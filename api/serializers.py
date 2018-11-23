@@ -1,8 +1,19 @@
 from rest_framework import serializers
-from api.models import  Dictionary
+from api.models import Dictionary, Entry, Meaning
+
 
 # Serializers define the API representation.
-class DictionarySerializer(serializers.HyperlinkedModelSerializer):
+class MeaningSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Meaning
+        fields = '__all__'
+
+class EntrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Entry
+        fields = ['term', 'meaning_set']
+
+class DictionarySerializer(serializers.ModelSerializer):
     class Meta:
         model = Dictionary
-        fields = '__all__'
+        fields = ['name', 'entry_set']

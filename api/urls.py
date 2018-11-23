@@ -6,12 +6,13 @@ from . import process
 from django.conf.urls import url, include
 from django.contrib.auth.models import User
 from rest_framework import routers
-from api.views import DictionaryViewSet
-
+from api.views import DictionaryViewSet, EntryViewSet, MeaningViewSet
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
 router.register(r'dictionaries', DictionaryViewSet)
+router.register(r'entries', EntryViewSet)
+router.register(r'meanings', MeaningViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
