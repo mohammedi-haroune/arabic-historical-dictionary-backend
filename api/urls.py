@@ -16,7 +16,6 @@ router.register(r'dictionaries', DictionaryViewSet)
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
-    path('', process.means, name='means'),
     path('wassit',fill_wassit.addWassit, name='wassit'),
     path('entries',fill_wassit.entries,name='entries'),
     url(r'^', include(router.urls)),
