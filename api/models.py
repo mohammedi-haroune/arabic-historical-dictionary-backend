@@ -46,9 +46,10 @@ class Corpus(models.Model):
     #     order_with_respect_to = 'name'
 
 class Period(models.Model):
-    name = models.CharField(max_length=255)
-    start = models.DateField()
-    end = models.DateField()
+    name = models.CharField(max_length=255, unique=True)
+    start = models.IntegerField()
+    end = models.IntegerField()
+    description = models.CharField(max_length=255, default='لا توجد')
     def __str__(self):
         return self.name
     # class Meta:
