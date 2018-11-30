@@ -9,7 +9,7 @@ RUN pip install -r requirements.txt
 ADD . /code/
 
 #server
-EXPOSE 8001
+EXPOSE 8000
 STOPSIGNAL SIGINT
 ENTRYPOINT ["python", "manage.py"]
-CMD ["runserver", "0.0.0.0:8001"]
+CMD ["runserver", "0.0.0.0:8000"]
