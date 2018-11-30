@@ -57,8 +57,12 @@ class Period(models.Model):
 
 class Document(models.Model):
     name = models.CharField(max_length=255)
-    type = models.CharField(max_length=255)
-    path = models.TextField()
+    fileid = models.TextField(max_length=255, unique=True)
+    category = models.CharField(max_length=255)
+    author = models.CharField(max_length=255)
+    birth_date = models.DateField(blank=True),
+    death_date = models.DateField(blank=True),
+    description = models.CharField(max_length=255, blank=True)
     corpus = models.ForeignKey(Corpus,on_delete=models.CASCADE)
     period = models.ForeignKey(Period,on_delete=models.PROTECT)
     meanings = models.ManyToManyField(Meaning,through='Appears')
