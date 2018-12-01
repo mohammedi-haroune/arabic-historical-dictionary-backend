@@ -1,5 +1,8 @@
 import sys
 import getopt
+from pathlib import Path
+home = str(Path.home())
+import tempfile
 
 eras = ['Jahiliy','SadrIslam','Umayyad','Abbasid','Dual','Modern']
 mapEraToArabic = {
@@ -12,8 +15,8 @@ mapEraToArabic = {
 }
 eraStart = [460,610,661,750,1258,1798]
 eraEnd = [610,661,750,1258,1798,2019]
-path = "./rawData" # where to put scraped files
-xmlDir = 'xmlCorpus'  # where to put xml files
+path = tempfile.gettempdir()+"/rawData" # where to put scraped files
+xmlDir = str(Path.home())+'/xmlCorpus'  # where to put xml files
 def createDirectories():
     import os
     for x in eras:

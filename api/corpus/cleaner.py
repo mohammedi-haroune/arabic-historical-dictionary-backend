@@ -55,7 +55,7 @@ def convertScrapedToXml(xmlDir='xmlCorpus'):
     import json
 
     # bk = {}
-
+    tempAuthors = {}
     for era in bs.eras:
         dir = xmlDir + '/' + era
         # bk[era] = {}
@@ -64,10 +64,15 @@ def convertScrapedToXml(xmlDir='xmlCorpus'):
         limit = -1
         for book in books[era]:
             print(book)
-            try:
-                infos = bs.getBirthDeathFromAuthor(book['author'])
-            except Exception:
-                continue
+            if book['author'] in tempAuthors:
+                infos = tempAuthors[book['author']]
+            else:
+                try:
+                    infos = bs.getBirthDeathFromAuthor(book['author'])
+                    tempAuthors[book['author']] = infos
+                except Exception:
+                    continue
+
             author = {'name': book['author'], 'birth': infos[0], 'death': infos[1]}
             path = _createXml(book['path'], book['name'], author, book['type'], dir,era)
             # if book['type'] in bk[era]:

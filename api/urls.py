@@ -24,7 +24,7 @@ urlpatterns = [
     path('entries',fill_maany.entries,name='entries'),
     path('maany', fill_maany.addMaany, name='maany'),
     path('periods', fill_models.addPeriods, name='periods'),
-    path('documents', fill_documents.addDocuments, name='documents'),
+    path('fill/documents', fill_documents.addDocuments, name='documents'),
     path('testDoc',fill_documents.testDoc, name='testDoc'),
     url(r'^', include(router.urls)),
     path('categories/', CategoryList.as_view()),
