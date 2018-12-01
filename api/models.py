@@ -60,8 +60,8 @@ class Document(models.Model):
     fileid = models.TextField(max_length=255, unique=True)
     category = models.CharField(max_length=255)
     author = models.CharField(max_length=255)
-    birth_date = models.DateField(blank=True),
-    death_date = models.DateField(blank=True),
+    birth_date = models.CharField(max_length=255,default='غير معروف')
+    death_date = models.CharField(max_length=255,default='غير معروف')
     description = models.CharField(max_length=255, blank=True)
     corpus = models.ForeignKey(Corpus,on_delete=models.CASCADE)
     period = models.ForeignKey(Period,on_delete=models.PROTECT)

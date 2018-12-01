@@ -2,3 +2,8 @@ Django==2.1.2
 django-cors-headers==2.4.0
 djangorestframework==3.9.0
 pytz==2018.7
+wptools
+beautifulsoup4
+requests
+nltk
+selenium

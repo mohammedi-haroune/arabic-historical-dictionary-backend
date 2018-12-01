@@ -1,6 +1,7 @@
 from django.urls import path
 
-from api.fill_database import fill_wassit
+from api.fill_database import fill_wassit, fill_models, fill_documents
+from api.fill_database import fill_maany
 from . import process
 
 from django.conf.urls import url, include
@@ -20,7 +21,11 @@ router.register(r'documents', DocumentViewSet)
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
     path('wassit',fill_wassit.addWassit, name='wassit'),
-    path('entries',fill_wassit.entries,name='entries'),
+    path('entries',fill_maany.entries,name='entries'),
+    path('maany', fill_maany.addMaany, name='maany'),
+    path('periods', fill_models.addPeriods, name='periods'),
+    path('documents', fill_documents.addDocuments, name='documents'),
+    path('testDoc',fill_documents.testDoc, name='testDoc'),
     url(r'^', include(router.urls)),
     path('categories/', CategoryList.as_view()),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))

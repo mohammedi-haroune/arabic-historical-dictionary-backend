@@ -1,10 +1,12 @@
 import json
 
+from django.http import HttpResponse
+
 from api.models import Period, Document, Corpus
 from random import randint
 
-def addPeriods():
-    periods = json.loads(open("api/fill_database/periods.json").read())
+def addPeriods(request):
+    periods = json.loads(open("api/fill_database/periods2.json").read())
 
     print(periods)
 
@@ -16,6 +18,7 @@ def addPeriods():
     print(periodsToCreate)
 
     Period.objects.bulk_create(periodsToCreate)
+    return HttpResponse("done!")
 
 
 def addDocuments():
