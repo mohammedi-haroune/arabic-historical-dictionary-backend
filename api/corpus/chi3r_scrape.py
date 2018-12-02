@@ -61,7 +61,7 @@ def scrape_all(limit = -1):
                         if not cEra:
                             print(node.text)
                             continue
-                        if bs.bookExists(node3.text,cEra,books):
+                        if bs.bookExists(node3.text,books):
                             setLimit -= 1
                             if not setLimit:
                                 break

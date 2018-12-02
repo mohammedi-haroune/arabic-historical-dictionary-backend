@@ -1,11 +1,19 @@
 
 from initializer import eras, eraEnd, eraStart, path
+import pyarabic.araby as ar
+
+def normalizeText(content):
+    content = ar.strip_tatweel(content)
+    content = ar.strip_tashkeel(content)
+    content = ar.normalize_ligature(content)
+    return content
 
 def getFilePath(name,era,type='divers',author="unknown"):
     import os
     if era not in eras:
         return None #come on ..
-
+    name = normalizeText(name)
+    author = normalizeText(author)
     if not os.path.isdir(path + '/' + era + '/' + type):
         os.mkdir(path + '/' + era + '/' + type)
     if author != "":
@@ -149,13 +157,15 @@ def saveListOfBooks():
     with open('books.json', 'w') as fp:
         json.dump(books, fp)
 
-def bookExists(name,era,books=None):
-    if not books:
-        books = loadListOfBooksByEras()
-    books = books[era]
-    for book in books:
-        if name == book['name']:
-            return True
+def bookExists(name,allBooks=None):
+    name = normalizeText(name)
+    if not allBooks:
+        allBooks = loadListOfBooksByEras()
+    for era in eras:
+        books = allBooks[era]
+        for book in books:
+            if name == book['name']:
+                return True
     return False
 
 def loadListOfBooksByEras():
