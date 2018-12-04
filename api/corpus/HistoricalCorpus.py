@@ -4,7 +4,7 @@ except ImportError: from xml.etree import ElementTree
 from nltk.corpus import XMLCorpusReader
 import nltk
 from nltk.internals import ElementWrapper
-
+import basic as bs
 
 class HistoricalCorpus(XMLCorpusReader):
 
@@ -55,19 +55,58 @@ class HistoricalCorpus(XMLCorpusReader):
 
         return fileids
 
-    def sents(self,fileid):
-        doc = self.xml(fileid)
-        encoding = self.encoding(fileid)
-        iterator = doc.getiterator()
-        out = []
+    def _genSents(self,fileid,start=None,end=None):
+        if not start:
+            start = 0
+        cpt = 0
+        for event, entry in ElementTree.iterparse(self.abspath(fileid).open()):
+            if entry.tag == "sentence":
+                cpt += 1
+                if end is not None and cpt > end:
+                    break
+                if cpt < start:
+                    continue
+                yield nltk.TreebankWordTokenizer().tokenize(entry.text)
 
-        for node in iterator:
-            text = node.text
-            if text is not None:
-                if isinstance(text, bytes):
-                    text = text.decode(encoding)
-                out.append(nltk.wordpunct_tokenize(text))
-        return out
+    def sents(self,fileid,start=None,end=None):
+        return [sent for sent in self._genSents(fileid,start,end)]
+
+    def words(self, fileid=None,start=None,end=None):
+        if not fileid:
+            fileid = self.fileids()[0]
+        if not start:
+            start = 0
+        sentences = self._genSents(fileid) #get all sentences generator
+        words = []
+        cpt = 0
+        for sentence in sentences:
+            if end is not None and cpt >= end:
+                break
+            print(cpt)
+            print(len(sentence))
+            if cpt < start:
+                if cpt + len(sentence) >= start:
+                    words += sentence[start-cpt:]
+                cpt += len(sentence)
+                continue
+            words += sentence
+            cpt += len(sentence)
+
+        if end is not None and cpt > end:
+            words = words[:-(cpt - end)]
+
+
+
+        return words
+
+    def sents_normalized(self, fileid,start=None,end=None):
+        sentences = self.sents(fileid,start,end)
+        return [[bs.normalizeText(word) for word in sentence] for sentence in sentences]
+
+    def words_normalized(self, fileid=None,start=None,end=None):
+        return [bs.normalizeText(word) for word in self.words(fileid,start,end)]
+
+
 
     def booksDescription(self):
         return [self.metadata(fileid) for fileid in self.fileids()]

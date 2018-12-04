@@ -10,7 +10,7 @@ def scrape_all(limit=-1):
   for node in soup.find_all("a"):
     if node.get("href").endswith("txt"):
       # Asr hadith, category => news
-      if bs.bookExists(node.text,bs.eras[-1],books):
+      if bs.bookExists(node.text,books):
           continue
       fileName = bs.getFilePath(node.text, bs.eras[-1], "news")
 

@@ -41,7 +41,6 @@ if __name__ == "__main__":
             light_scrape = True
         else:
             print('heavy scrape mode selected')
-            exit(1)
 
 
     if light_scrape:

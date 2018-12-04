@@ -69,7 +69,7 @@ def scrapeIslamic(parent,page,type="history",limit=-1):
 
         if era == 'unknown':
             continue
-        if bs.bookExists(book,era,books):
+        if bs.bookExists(book,books):
             limit-=1
             if not limit:
                 return
