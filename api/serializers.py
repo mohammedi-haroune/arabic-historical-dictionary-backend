@@ -62,7 +62,7 @@ class DocumentSerializer(serializers.ModelSerializer):
 
     def get_raw(self, obj):
         print('getting sample words', obj.fileid)
-        raw = ' '.join(corpus.words(fileid=obj.fileid))
+        raw = ' '.join(corpus.sents(fileid=obj.fileid))
         print(raw)
         return raw
 
