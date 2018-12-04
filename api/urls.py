@@ -29,6 +29,7 @@ urlpatterns = [
     path('testDoc',fill_documents.testDoc, name='testDoc'),
     path('categories/', CategoryList.as_view()),
     path('postags/', PostagList.as_view()),
+    path('sentences/', SentenceViewSet.as_view({'get': 'list'})),
     #path('sentences/', SentenceList.as_view()),
     url(r'^', include(router.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
