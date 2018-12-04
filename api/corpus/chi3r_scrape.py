@@ -1,6 +1,6 @@
 import urllib.request
 from bs4 import BeautifulSoup
-import basic as bs
+from . import basic as bs
 import re
 
 """ procedure :
@@ -66,7 +66,7 @@ def scrape_all(limit = -1):
                             if not setLimit:
                                 break
                             continue
-                        filename = bs.getFilePath(node3.text, cEra, "poem", node1.text)
+                        filename = bs.getFilePath(node3.text, cEra, "شعر", node1.text)
 
                         # if node.text == "العصر الجاهلي":
                         #     filename = bs.getFilePath(node3.text, "Jahiliy", "poem", node1.text) + ".txt"

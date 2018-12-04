@@ -1,6 +1,6 @@
 import urllib.request
 from bs4 import BeautifulSoup
-import basic as bs
+from . import basic as bs
 
 def scrape_all(limit=-1):
   rep = urllib.request.urlopen("http://aracorpus.e3rab.com/argistestsrv.nmsu.edu/AraCorpus/Data/")

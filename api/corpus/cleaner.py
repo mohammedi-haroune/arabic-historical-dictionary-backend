@@ -39,7 +39,7 @@ def _clean_text(content):
 def _moveAstrayBooks(booksToMove):
     pass
 
-def _createXml(path,name,author,type,savePath,era):
+def _createXml(path,name,author,type,savePath,era,id):
     root = ET.Element("root",encoding='utf-8')
     metaData = ET.SubElement(root,'metadata')
     ET.SubElement(metaData, 'book_name').text = name
@@ -48,11 +48,15 @@ def _createXml(path,name,author,type,savePath,era):
     ET.SubElement(auth, 'name').text = author['name']
     ET.SubElement(auth, 'birth').text = str(author['birth'])
     ET.SubElement(auth, 'death').text = str(author['death'])
+    ET.SubElement(metaData,'id').text = str(id)
     ET.SubElement(metaData, 'type').text = type
-    doc = ET.SubElement(root, "doc")
+
     content = open(path,'r').read()
     content = _clean_text(content)
     sentences = _sentenceTokenizer(content)
+    print(str(len(sentences)))
+    ET.SubElement(metaData, 'size').text = str(len(sentences))
+    doc = ET.SubElement(root, "doc")
     for sentence in sentences:
         ET.SubElement(doc, "sentence").text = sentence
     tree = ET.ElementTree(root)
@@ -78,6 +82,7 @@ def convertScrapedToXml(xmlDir='xmlCorpus'):
     import json
 
     tempAuthors = {}
+    id = 1
     for era in bs.eras:
         dir = xmlDir + '/' + era
         if not os.path.isdir(dir):
@@ -95,7 +100,8 @@ def convertScrapedToXml(xmlDir='xmlCorpus'):
                     continue
 
             author = {'name': book['author'], 'birth': infos[0], 'death': infos[1]}
-            path = _createXml(book['path'], book['name'], author, book['type'], dir,era)
+            path = _createXml(book['path'], book['name'], author, book['type'], dir,era,id)
+            id += 1
             limit-=1
             if not limit: break
     corpus = HistoricalCorpus(xmlDir)
@@ -103,6 +109,7 @@ def convertScrapedToXml(xmlDir='xmlCorpus'):
     with open(xmlDir+'/books_description.json', 'w') as fp:
         json.dump(bk, fp)
 def _readXml():
+    import json
     corpus = HistoricalCorpus(initializer.xmlDir)
     print(len(corpus.fileids()))
     # print(corpus.sents(corpus.fileids()[1]))
@@ -114,13 +121,18 @@ def _readXml():
     words = corpus.words(file,30,60)
     print(words)
     print(len(words))
+    sentences = corpus._gen_sents_class_based(file)
+    print(len(sentences))
+    sentences = corpus.sents(file)
+    print(len(sentences))
+    print(sentences[0])
+    # arb_stopwords = set(nltk.corpus.stopwords.words("arabic"))
+    # apparitions = corpus.words_apparitions(stop_words=arb_stopwords)
+    # with open('apps.json', 'w') as fp:
+    #     json.dump(apparitions, fp)
+    # print(len(apparitions))
 
 
 if __name__ == '__main__':
     # convertScrapedToXml()
-    print(_normalize_text('yasserُ'))
-    print('done')
-    _normalize_text('أَرَسمــاً جَديداً مِن نَوارَ تَعَرُّفُ العصر الاموي')
-    words = nltk.TreebankWordTokenizer().tokenize('أَرَسمــاً جَديداً مِن نَوارَ تَعَرُّفُ العصر الاموي')
-    print(words)
     _readXml()

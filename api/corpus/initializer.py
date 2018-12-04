@@ -3,6 +3,9 @@ import getopt
 from pathlib import Path
 home = str(Path.home())
 import tempfile
+from api.corpus import islamicbook_scrape
+from api.corpus import news_scrape
+from api.corpus import chi3r_scrape
 
 eras = ['Jahiliy','SadrIslam','Umayyad','Abbasid','Dual','Modern']
 mapEraToArabic = {
@@ -25,10 +28,8 @@ def createDirectories():
             print(x + ' created.')
 
 if __name__ == "__main__":
-    import islamicbook_scrape
-    import news_scrape
-    import chi3r_scrape
-    import cleaner
+
+    import api.corpus.cleaner as cleaner
     import os
 
     createDirectories()
@@ -43,14 +44,14 @@ if __name__ == "__main__":
             print('heavy scrape mode selected')
 
 
-    if light_scrape:
-        islamicbook_scrape.scrape_all(3)
-        # news_scrape.scrape_all(1)
-        chi3r_scrape.scrape_all(20)
-    else:
-        islamicbook_scrape.scrape_all()
-        news_scrape.scrape_all()
-        chi3r_scrape.scrape_all()
+    # if light_scrape:
+    #     islamicbook_scrape.scrape_all(3)
+    #     # news_scrape.scrape_all(1)
+    #     chi3r_scrape.scrape_all(20)
+    # else:
+    #     islamicbook_scrape.scrape_all()
+    #     news_scrape.scrape_all()
+    #     chi3r_scrape.scrape_all()
 
     # cleaning
     cleaner.clean()

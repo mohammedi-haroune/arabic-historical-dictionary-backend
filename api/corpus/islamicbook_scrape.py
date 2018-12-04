@@ -1,6 +1,6 @@
 import urllib.request
 from bs4 import BeautifulSoup
-import basic as bs
+from . import basic as bs
 
 def scrape_page(parent,page,writer):
     rep = urllib.request.urlopen(parent+page)
@@ -35,7 +35,7 @@ def scrape_page(parent,page,writer):
 
 # scrape_page(parent,"aaian-alasr-002.html",None)
 
-def scrapeIslamic(parent,page,type="history",limit=-1):
+def scrapeIslamic(parent,page,type="تاريخ",limit=-1):
     rep = urllib.request.urlopen(parent+page)
     soup = BeautifulSoup(rep, "html.parser")
     nextLink = ""
@@ -96,14 +96,14 @@ def scrape_all(limit = -1):
     parents = ["http://www.islamicbook.ws/qbook/", "http://www.islamicbook.ws/ageda/"
         , "http://www.islamicbook.ws/hadeth/", "http://www.islamicbook.ws/asol/", ]
     for parent in parents:
-        scrapeIslamic(parent, "", "religion",limit=limit)
+        scrapeIslamic(parent, "", "دين",limit=limit)
         if limit > 0: # light mode selected
             break
 
     parent = "http://www.islamicbook.ws/adab/"
-    scrapeIslamic(parent, "", "literature",limit=limit)
+    scrapeIslamic(parent, "", "أدب",limit=limit)
     parent = "http://www.islamicbook.ws/amma/"
-    scrapeIslamic(parent, "", "divers",limit=limit)
+    scrapeIslamic(parent, "", "متنوعة",limit=limit)
 
 if __name__ == "__main__":
     scrape_all()
