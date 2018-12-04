@@ -5,6 +5,7 @@ try:
 except ImportError:
     from .initializer import xmlDir
     from . import basic as bs
+
 try:
     from .HistoricalCorpus import HistoricalCorpus
 except ImportError:
