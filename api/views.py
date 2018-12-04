@@ -1,4 +1,4 @@
-from rest_framework import viewsets, serializers
+from rest_framework import viewsets, serializers, generics, mixins
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -95,8 +95,18 @@ class SentenceList(APIView):
         fileid = Document.objects.get(pk=request.GET['id']).fileid
         return Response(corpus.sents(fileid))
 
-class SentenceViewSet(viewsets.ViewSet):
+class SentenceViewSet(viewsets.GenericViewSet):
     serializer_class = serializers.ListField(child=serializers.CharField())
-    def get(self):
+
+    def get_queryset(self):
         fileid = Document.objects.get(pk=self.request.GET['id']).fileid
-        return Response(corpus.sents(fileid))
+        return corpus._gen_sents_class_based(fileid)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            return self.get_paginated_response(page)
+
+        return Response(page)
