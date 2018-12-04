@@ -65,7 +65,11 @@ class Document(models.Model):
     description = models.CharField(max_length=255, blank=True)
     corpus = models.ForeignKey(Corpus,on_delete=models.CASCADE)
     period = models.ForeignKey(Period,on_delete=models.PROTECT)
-    meanings = models.ManyToManyField(Meaning,through='Appears')
+    entries = models.ManyToManyField(Entry,through='Appears')
+
+    def sample(self, corpus):
+        return corpus.raw(fileid=self.fileid)[:200]
+
     def __str__(self):
         return self.name
     # class Meta:
@@ -76,7 +80,7 @@ class Appears(models.Model):
     confirmed = models.BooleanField(default=False)
     position = models.BigIntegerField()
     document = models.ForeignKey(Document,on_delete=models.CASCADE)
-    meaning = models.ForeignKey(Meaning,on_delete=models.CASCADE)
+    entry = models.ForeignKey(Entry,on_delete=models.CASCADE)
     def __str__(self):
         return self.sentence
     # class Meta:
