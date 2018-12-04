@@ -4,7 +4,72 @@ except ImportError: from xml.etree import ElementTree
 from nltk.corpus import XMLCorpusReader
 import nltk
 from nltk.internals import ElementWrapper
-import basic as bs
+#import basic as bs
+
+from itertools import islice
+
+class Sliceable(object):
+    """Sliceable(iterable) is an object that wraps 'iterable' and
+    generates items from 'iterable' when subscripted. For example:
+
+        >>> from itertools import count, cycle
+        >>> s = Sliceable(count())
+        >>> list(s[3:10:2])
+        [3, 5, 7, 9]
+        >>> list(s[3:6])
+        [13, 14, 15]
+        >>> next(Sliceable(cycle(range(7)))[11])
+        4
+        >>> s['string']
+        Traceback (most recent call last):
+            ...
+        KeyError: 'Key must be non-negative integer or slice, not string'
+
+    """
+    def __init__(self, iterable):
+        self.iterable = iterable
+
+    def __getitem__(self, key):
+        if isinstance(key, int) and key >= 0:
+            return islice(self.iterable, key, key + 1)
+        elif isinstance(key, slice):
+            return islice(self.iterable, key.start, key.stop, key.step)
+        else:
+            raise KeyError("Key must be non-negative integer or slice, not {}"
+                           .format(key))
+
+class SentsIterator(object):
+    def __init__(self, corpus, fileid):
+        self.tree_iterator = ElementTree.iterparse(corpus.abspath(fileid).open())
+        self.num = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        return self.next()
+
+    def next(self):
+        if self.num < len(self):
+            event, entry = self.tree_iterator.__next__()
+            if entry.tag == "sentence" and entry.text is not None:
+                return nltk.TreebankWordTokenizer().tokenize(entry.text)
+            else:
+                return self.next()
+        else:
+            raise StopIteration()
+
+    def __getitem__(self, key):
+        if isinstance(key, int) and key >= 0:
+            return islice(self, key, key + 1)
+        elif isinstance(key, slice):
+            return islice(self, key.start, key.stop, key.step)
+        else:
+            raise KeyError("Key must be non-negative integer or slice, not {}"
+                           .format(key))
+
+    def __len__(self):
+        return 50
 
 class HistoricalCorpus(XMLCorpusReader):
 
@@ -60,13 +125,18 @@ class HistoricalCorpus(XMLCorpusReader):
             start = 0
         cpt = 0
         for event, entry in ElementTree.iterparse(self.abspath(fileid).open()):
-            if entry.tag == "sentence":
+            if entry.tag == "sentence" and entry.text is not None:
+                print(entry.text)
+                print(event)
                 cpt += 1
                 if end is not None and cpt > end:
                     break
                 if cpt < start:
                     continue
                 yield nltk.TreebankWordTokenizer().tokenize(entry.text)
+
+    def _gen_sents_class_based(self, fileid):
+        return SentsIterator(self, fileid)
 
     def sents(self,fileid,start=None,end=None):
         return [sent for sent in self._genSents(fileid,start,end)]
