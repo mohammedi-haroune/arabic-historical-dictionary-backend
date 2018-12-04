@@ -1,5 +1,5 @@
 
-from api.corpus.initializer import eras, eraEnd, eraStart, path
+from initializer import eras, eraEnd, eraStart, path
 import pyarabic.araby as ar
 
 def normalizeText(content):

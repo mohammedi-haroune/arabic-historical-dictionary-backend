@@ -1,6 +1,6 @@
 import urllib.request
 from bs4 import BeautifulSoup
-from . import basic as bs
+import basic as bs
 import re
 
 """ procedure :
