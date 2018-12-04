@@ -7,7 +7,8 @@ from . import process
 from django.conf.urls import url, include
 from django.contrib.auth.models import User
 from rest_framework import routers
-from api.views import DictionaryViewSet, EntryViewSet, MeaningViewSet, PeriodViewSet, CategoryList, DocumentViewSet
+from api.views import DictionaryViewSet, EntryViewSet, MeaningViewSet, PeriodViewSet, CategoryList, DocumentViewSet, \
+    PostagList, SentenceList, SentenceViewSet
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
@@ -26,7 +27,9 @@ urlpatterns = [
     path('periods', fill_models.addPeriods, name='periods'),
     path('fill/documents', fill_documents.addDocuments, name='documents'),
     path('testDoc',fill_documents.testDoc, name='testDoc'),
-    url(r'^', include(router.urls)),
     path('categories/', CategoryList.as_view()),
+    path('postags/', PostagList.as_view()),
+    #path('sentences/', SentenceList.as_view()),
+    url(r'^', include(router.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
