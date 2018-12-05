@@ -3,9 +3,7 @@ import getopt
 from pathlib import Path
 home = str(Path.home())
 import tempfile
-import islamicbook_scrape
-import news_scrape
-import chi3r_scrape
+
 
 eras = ['Jahiliy','SadrIslam','Umayyad','Abbasid','Dual','Modern']
 mapEraToArabic = {
@@ -29,7 +27,16 @@ def createDirectories():
 
 if __name__ == "__main__":
 
-    import cleaner
+    try:
+        from api.corpus import islamicbook_scrape
+        from api.corpus import news_scrape
+        from api.corpus import chi3r_scrape
+        import api.corpus.cleaner as cleaner
+    except Exception:
+        from . import islamicbook_scrape
+        from . import news_scrape
+        from . import chi3r_scrape
+        from . import cleaner
     import os
 
     createDirectories()

@@ -1,6 +1,9 @@
 import urllib.request
 from bs4 import BeautifulSoup
-import basic as bs
+try:
+    from . import basic as bs
+except Exception:
+    from . import basic as bs
 import re
 
 """ procedure :

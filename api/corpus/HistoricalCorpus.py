@@ -4,7 +4,10 @@ except ImportError: from xml.etree import ElementTree
 from nltk.corpus import XMLCorpusReader
 import nltk
 from nltk.internals import ElementWrapper
-import basic as bs
+try:
+    from api.corpus.basic import normalizeText
+except Exception:
+    from .basic import normalizeText
 from itertools import islice
 
 class Sliceable(object):
@@ -194,10 +197,10 @@ class HistoricalCorpus(XMLCorpusReader):
 
     def sents_normalized(self, fileid,start=None,end=None,era=None,category=None):
         sentences = self.sents(fileid,start,end,era,category)
-        return [[bs.normalizeText(word) for word in sentence] for sentence in sentences]
+        return [[normalizeText(word) for word in sentence] for sentence in sentences]
 
     def words_normalized(self, fileid=None,start=None,end=None,era=None,category=None):
-        return [bs.normalizeText(word) for word in self.words(fileid,start,end,era,category)]
+        return [normalizeText(word) for word in self.words(fileid,start,end,era,category)]
 
     def getIdFromFileid(self,fileid):
         return self._idsByfileIds[fileid]

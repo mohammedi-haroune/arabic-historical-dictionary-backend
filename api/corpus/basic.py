@@ -1,5 +1,7 @@
-
-from initializer import eras, eraEnd, eraStart, path
+try:
+    from api.corpus.initializer import eras, eraEnd, eraStart, path
+except Exception:
+    from .initializer import xmlDir, eras, mapEraToArabic
 import pyarabic.araby as ar
 
 def normalizeText(content):
