@@ -44,27 +44,27 @@ class PeriodSerializer(serializers.ModelSerializer):
 
 
 class DocumentSerializer(serializers.ModelSerializer):
-    sample = serializers.SerializerMethodField()
-    raw = serializers.SerializerMethodField()
+    # sample = serializers.SerializerMethodField()
+    # raw = serializers.SerializerMethodField()
     period = PeriodSerializer()
 
-    def __init__(self, *args, **kwargs):
-        super(DocumentSerializer, self).__init__(*args, **kwargs)
-        raw = self.context['request'].query_params.get('raw', False)
-        if not raw:
-            self.fields.pop('raw')
+    # def __init__(self, *args, **kwargs):
+    #     super(DocumentSerializer, self).__init__(*args, **kwargs)
+    #     raw = self.context['request'].query_params.get('raw', False)
+    #     if not raw:
+    #         self.fields.pop('raw')
 
-    def get_sample(self, obj):
-        print('getting sample words', obj.fileid)
-        raw = ' '.join(corpus.words(fileid=obj.fileid))[:100]
-        print(raw)
-        return raw
-
-    def get_raw(self, obj):
-        print('getting sample words', obj.fileid)
-        raw = ' '.join(corpus.sents(fileid=obj.fileid))
-        print(raw)
-        return raw
+    # def get_sample(self, obj):
+    #     print('getting sample words', obj.fileid)
+    #     raw = ' '.join(corpus.words(fileid=obj.fileid))[:100]
+    #     print(raw)
+    #     return raw
+    #
+    # def get_raw(self, obj):
+    #     print('getting sample words', obj.fileid)
+    #     raw = ' '.join(corpus.sents(fileid=obj.fileid))
+    #     print(raw)
+    #     return raw
 
     class Meta:
         model = Document
