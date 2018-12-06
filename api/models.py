@@ -15,6 +15,7 @@ class Entry(models.Model):
         return self.term
     class Meta:
         ordering = ('term',)
+        unique_together = ('term', 'dictionary')
 
 
 class Meaning(models.Model):
