@@ -16,6 +16,10 @@ mapEraToArabic = {
     eras[5]: 'العصر الحديث'
 }
 
+def getPeriod(periods,key):
+    if key in periods:
+        return periods[key]
+    return None
 
 def addDocuments(request):
     corpus = Corpus.objects.filter(path=xmlDir,name='الجامع الاساسي')
@@ -34,6 +38,10 @@ def addDocuments(request):
         else:
             period = period[0]
         periods[era] = period
+    period = Period.objects.filter(name="كل الأوقات")
+    if not period:
+        raise Exception("couldn't find era كل الأوقات")
+    periods['all'] = period[0]
     documentsToCreate = [Document(
         name=doc['book_name'],
         fileid=doc['fileid'],
@@ -42,7 +50,7 @@ def addDocuments(request):
         birth_date=str(doc['author']['birth']),
         death_date=str(doc['author']['death']),
         corpus=corpus,
-        period=periods[doc['era']]) for doc in documents]
+        period=getPeriod(periods,doc['era'])) for doc in documents]
 
     meaningsToCreate = []
     Document.objects.bulk_create(documentsToCreate)
