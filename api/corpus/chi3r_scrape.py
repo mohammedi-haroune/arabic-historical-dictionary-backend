@@ -1,9 +1,8 @@
 from bs4 import BeautifulSoup
-try:
-    from . import basic as bs
-except Exception:
-    from . import basic as bs
-
+# try:
+#     from . import basic as bs
+# except Exception:
+from . import basic as bs
 import re
 import urllib.request
 

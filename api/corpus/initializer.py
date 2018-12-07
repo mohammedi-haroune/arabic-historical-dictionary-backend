@@ -11,48 +11,43 @@ except Exception:
 
 import sys
 import getopt
-from pathlib import Path
-import tempfile
 import os
 
-home = str(Path.home())
+from .basic import eras, path, xmlDir
 
-eras = ['Jahiliy','SadrIslam','Umayyad','Abbasid','Dual','Modern']
-mapEraToArabic = {
-    eras[0]: 'العصر الجاهلي',
-    eras[1]: 'عصر صدر الإسلام',
-    eras[2]: 'عصر بني أمية',
-    eras[3]: 'عصر بني العباس',
-    eras[4]: 'عصر الدول المتتابعة',
-    eras[5]: 'العصر الحديث'
-}
-eraStart = [460,610,661,750,1258,1798]
-eraEnd = [610,661,750,1258,1798,2019]
-path = tempfile.gettempdir()+"/rawData" # where to put scraped files
-xmlDir = os.environ.get('XML_CORPUS_DIR', str(Path.home())+'/xmlCorpus')  # where to put xml files
 def createDirectories():
     for x in eras:
         if not os.path.isdir(path + '/' + x):
             os.makedirs(path + '/' + x)  # line B
             print(x + ' created.')
 
-def init():
+def initialize():
+    # try:
+    #     from api.corpus import islamicbook_scrape
+    #     from api.corpus import news_scrape
+    #     from api.corpus import chi3r_scrape
+    #     import api.corpus.cleaner as cleaner
+    # except Exception:
+    from . import islamicbook_scrape
+    from . import news_scrape
+    from . import chi3r_scrape
+    from . import cleaner
+    import os
 
     createDirectories()
     light_scrape = True
 
-    options, remainder = getopt.getopt(sys.argv[1:], 'l',[])
-    for opt,arg in options:
+    options, remainder = getopt.getopt(sys.argv[1:], 'l', [])
+    for opt, arg in options:
         if opt == '-l':
             print('light scraping mode selected')
             light_scrape = True
         else:
             print('heavy scrape mode selected')
 
-
     if light_scrape:
-        islamicbook_scrape.scrape_all(1)
-        #news_scrape.scrape_all(1)
+        # islamicbook_scrape.scrape_all(1)
+        # news_scrape.scrape_all(1)
         chi3r_scrape.scrape_all(5)
     else:
         islamicbook_scrape.scrape_all()
@@ -68,4 +63,4 @@ def init():
     cleaner.convertScrapedToXml(xmlDir)
 
 if __name__ == "__main__":
-    init()
+    initialize()

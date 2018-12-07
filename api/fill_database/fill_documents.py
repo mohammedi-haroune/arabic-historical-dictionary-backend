@@ -4,7 +4,7 @@ from django.http import HttpResponse, JsonResponse
 
 from api.corpus.HistoricalCorpus import HistoricalCorpus
 from api.models import Corpus, Document, Period
-from api.corpus.initializer import xmlDir, eras, mapEraToArabic
+from api.corpus.basic import xmlDir, eras, mapEraToArabic
 
 
 def addDocuments(request):

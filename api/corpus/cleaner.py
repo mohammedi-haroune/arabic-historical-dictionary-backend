@@ -1,22 +1,15 @@
-from api.models import Document
-
-try:
-    from api.corpus.initializer import xmlDir
-    import api.corpus.basic as bs
-except ImportError:
-    try:
-        from .initializer import xmlDir
-        from . import basic as bs
-
-    except ImportError:
-        from api.corpus import xmlDir
-
-try:
-    from .HistoricalCorpus import HistoricalCorpus
-except ImportError:
-    from api.corpus.HistoricalCorpus import HistoricalCorpus
-
 import xml.etree.cElementTree as ET
+# try:
+#     from api.corpus.initializer import xmlDir
+#     import api.corpus.basic as bs
+# except ImportError:
+#     from .initializer import xmlDir
+from . import basic as bs
+
+# try:
+from .HistoricalCorpus import HistoricalCorpus
+# except ImportError:
+#     from api.corpus.HistoricalCorpus import HistoricalCorpus
 import os
 import nltk
 import pyarabic.araby as ar
@@ -124,7 +117,8 @@ def convertScrapedToXml(xmlDir='xmlCorpus'):
     with open(xmlDir+'/books_description.json', 'w') as fp:
         json.dump(bk, fp)
 def _readXml():
-    corpus = HistoricalCorpus(xmlDir)
+    import json
+    corpus = HistoricalCorpus(bs.xmlDir)
     print(len(corpus.fileids()))
     # print(corpus.sents(corpus.fileids()[1]))
     # corpus.metadata(corpus.fileids()[0])

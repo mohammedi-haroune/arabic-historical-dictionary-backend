@@ -1,10 +1,10 @@
 try: from xml.etree import cElementTree as ElementTree
 except ImportError: from xml.etree import ElementTree
 
-try:
-    from api.corpus.basic import normalizeText
-except Exception:
-    from .basic import normalizeText
+# try:
+#     from api.corpus.basic import normalizeText
+# except Exception:
+from .basic import normalizeText
 from itertools import islice
 
 from nltk.corpus import XMLCorpusReader
