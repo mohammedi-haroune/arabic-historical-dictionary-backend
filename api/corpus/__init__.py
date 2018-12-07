@@ -1,4 +1,11 @@
 from .HistoricalCorpus import HistoricalCorpus
 from pathlib import Path
+from .initializer import init, xmlDir, eras, mapEraToArabic
+import os
 
-corpus = HistoricalCorpus(str(Path.home())+'/xmlCorpus')
+if not os.path.isdir(xmlDir):
+    print('Could not find corpus in', xmlDir)
+    print('Scraping started')
+    init()
+
+corpus = HistoricalCorpus(xmlDir)

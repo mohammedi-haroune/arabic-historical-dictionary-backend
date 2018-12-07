@@ -3,7 +3,7 @@ import getopt
 from pathlib import Path
 home = str(Path.home())
 import tempfile
-
+import os
 
 eras = ['Jahiliy','SadrIslam','Umayyad','Abbasid','Dual','Modern']
 mapEraToArabic = {
@@ -17,16 +17,14 @@ mapEraToArabic = {
 eraStart = [460,610,661,750,1258,1798]
 eraEnd = [610,661,750,1258,1798,2019]
 path = tempfile.gettempdir()+"/rawData" # where to put scraped files
-xmlDir = str(Path.home())+'/xmlCorpus'  # where to put xml files
+xmlDir = os.environ.get('XML_CORPUS_DIR', str(Path.home())+'/xmlCorpus')  # where to put xml files
 def createDirectories():
-    import os
     for x in eras:
         if not os.path.isdir(path + '/' + x):
             os.makedirs(path + '/' + x)  # line B
             print(x + ' created.')
 
-if __name__ == "__main__":
-
+def init():
     try:
         from api.corpus import islamicbook_scrape
         from api.corpus import news_scrape
@@ -37,7 +35,6 @@ if __name__ == "__main__":
         from . import news_scrape
         from . import chi3r_scrape
         from . import cleaner
-    import os
 
     createDirectories()
     light_scrape = True
@@ -67,3 +64,6 @@ if __name__ == "__main__":
     if not os.path.isdir(xmlDir):
         os.makedirs(xmlDir)  # line B
     cleaner.convertScrapedToXml(xmlDir)
+
+if __name__ == "__main__":
+    init()
