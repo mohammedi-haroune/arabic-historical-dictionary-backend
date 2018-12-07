@@ -1,9 +1,10 @@
-import urllib.request
-from bs4 import BeautifulSoup
 try:
     from api.corpus import basic as bs
 except Exception:
     from . import basic as bs
+
+import urllib.request
+from bs4 import BeautifulSoup
 
 def scrape_all(limit=-1):
   rep = urllib.request.urlopen("http://aracorpus.e3rab.com/argistestsrv.nmsu.edu/AraCorpus/Data/")

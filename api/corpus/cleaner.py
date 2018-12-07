@@ -1,17 +1,27 @@
-import xml.etree.cElementTree as ET
+from api.models import Document
+
 try:
     from api.corpus.initializer import xmlDir
     import api.corpus.basic as bs
 except ImportError:
-    from .initializer import xmlDir
-    from . import basic as bs
+    try:
+        from .initializer import xmlDir
+        from . import basic as bs
+
+    except ImportError:
+        from api.corpus import xmlDir
 
 try:
     from .HistoricalCorpus import HistoricalCorpus
 except ImportError:
     from api.corpus.HistoricalCorpus import HistoricalCorpus
+
+import xml.etree.cElementTree as ET
 import os
 import nltk
+import pyarabic.araby as ar
+import json
+
 
 def clean():
     _cleanNotFound()
@@ -34,7 +44,6 @@ def _cleanNotFound():
             if notFound or empty:
                 os.remove(book['path'])
 def _normalize_text(content):
-    import pyarabic.araby as ar
     content = ar.strip_tatweel(content)
     content = ar.strip_tashkeel(content)
     content = ar.normalize_ligature(content)
@@ -87,8 +96,6 @@ def _sentenceTokenizer(content):
 
 def convertScrapedToXml(xmlDir='xmlCorpus'):
     books = bs.loadListOfBooksByEras()
-    import json
-
     tempAuthors = {}
     id = 1
     for era in bs.eras:
@@ -117,7 +124,6 @@ def convertScrapedToXml(xmlDir='xmlCorpus'):
     with open(xmlDir+'/books_description.json', 'w') as fp:
         json.dump(bk, fp)
 def _readXml():
-    import json
     corpus = HistoricalCorpus(xmlDir)
     print(len(corpus.fileids()))
     # print(corpus.sents(corpus.fileids()[1]))

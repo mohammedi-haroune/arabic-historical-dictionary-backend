@@ -1,9 +1,21 @@
+try:
+    from api.corpus import islamicbook_scrape
+    from api.corpus import news_scrape
+    from api.corpus import chi3r_scrape
+    import api.corpus.cleaner as cleaner
+except Exception:
+    from . import islamicbook_scrape
+    from . import news_scrape
+    from . import chi3r_scrape
+    from . import cleaner
+
 import sys
 import getopt
 from pathlib import Path
-home = str(Path.home())
 import tempfile
 import os
+
+home = str(Path.home())
 
 eras = ['Jahiliy','SadrIslam','Umayyad','Abbasid','Dual','Modern']
 mapEraToArabic = {
@@ -25,16 +37,6 @@ def createDirectories():
             print(x + ' created.')
 
 def init():
-    try:
-        from api.corpus import islamicbook_scrape
-        from api.corpus import news_scrape
-        from api.corpus import chi3r_scrape
-        import api.corpus.cleaner as cleaner
-    except Exception:
-        from . import islamicbook_scrape
-        from . import news_scrape
-        from . import chi3r_scrape
-        from . import cleaner
 
     createDirectories()
     light_scrape = True

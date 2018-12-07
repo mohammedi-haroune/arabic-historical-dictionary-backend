@@ -1,5 +1,4 @@
 from .HistoricalCorpus import HistoricalCorpus
-from pathlib import Path
 from .initializer import init, xmlDir, eras, mapEraToArabic
 import os
 

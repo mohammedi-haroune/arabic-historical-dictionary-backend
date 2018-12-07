@@ -4,6 +4,10 @@ except Exception:
     from .initializer import xmlDir, eras, mapEraToArabic
 import pyarabic.araby as ar
 
+from bs4 import BeautifulSoup
+import wptools as wp
+import requests, json, re, os
+
 def normalizeText(content):
     content = ar.strip_tatweel(content)
     content = ar.strip_tashkeel(content)
@@ -11,7 +15,6 @@ def normalizeText(content):
     return content
 
 def getFilePath(name,era,type='divers',author="unknown"):
-    import os
     if era not in eras:
         return None #come on ..
     name = normalizeText(name)
@@ -36,8 +39,6 @@ def getEraFromDate(date):
     return None
 
 def getBirthDeathFromAuthor(name,lang='ar'):
-    import wptools as wp
-    import re
     patternsDeath = [
         ".*Décès en.*?(\d+)",
         "^.*وفيات (\d+)$",
@@ -132,9 +133,6 @@ def getEraFromAuthor(name,lang='ar'):
     return 'unknown'
 
 def wikipediaFromGoogle(query):
-    import re
-    from bs4 import BeautifulSoup
-    import requests
     query = re.sub("\s","+",query)
     link = "https://www.google.com/search?sclient=psy-ab&client=ubuntu&hs=k5b&channel=fs&biw=1366&bih=648&noj=1&q="+query
     # r = requests.get(link)
@@ -154,7 +152,6 @@ def wikipediaFromGoogle(query):
 
 
 def saveListOfBooks():
-    import json
     books = loadListOfBooksByEras()
     with open('books.json', 'w') as fp:
         json.dump(books, fp)
@@ -171,8 +168,6 @@ def bookExists(name,allBooks=None):
     return False
 
 def loadListOfBooksByEras():
-    import re
-    import os
     books = {}
     for rootdir in eras:
         books[rootdir] = []
