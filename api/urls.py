@@ -1,6 +1,6 @@
 from django.urls import path
 
-from api.fill_database import fill_wassit, fill_models, fill_documents
+from api.fill_database import fill_wassit, fill_models, fill_documents, historicalDict
 from api.fill_database import fill_maany
 from . import process
 
@@ -25,6 +25,7 @@ urlpatterns = [
     path('entries',fill_maany.entries,name='entries'),
     path('maany', fill_maany.addMaany, name='maany'),
     path('periods', fill_models.addPeriods, name='periods'),
+    path('fill/historicDict', historicalDict.createXmlDict, name='historicDict'),
     path('fill/documents', fill_documents.addDocuments, name='documents'),
     path('testDoc',fill_documents.testDoc, name='testDoc'),
     path('categories/', CategoryList.as_view()),

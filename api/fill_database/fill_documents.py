@@ -45,7 +45,7 @@ def addDocuments(request):
     documentsToCreate = [Document(
         name=doc['book_name'],
         fileid=doc['fileid'],
-        category=doc['type'] ,
+        category=doc['type'],
         author=doc['author']['name'],
         birth_date=str(doc['author']['birth']),
         death_date=str(doc['author']['death']),
@@ -58,8 +58,5 @@ def addDocuments(request):
 
 def testDoc(request):
     # path = Corpus.objects.filter(name='الجامع الاساسي')[0].path
-    test = "يُشار إلى أن اللغة العربية يتحدثها أكثر من 422 مليون نسمة ويتوزع متحدثوها في المنطقة المعروفة باسم الوطن العربي بالإضافة إلى العديد من المناطق الأخرى المجاورة مثل الأهواز وتركيا وتشاد والسنغال وإريتريا وغيرها. وهي اللغة الرابعة من لغات منظمة الأمم المتحدة الرسمية الست."
-    far = Farasa()
-    res = far.lemmatize(test)
-    words = corpus.lemma_sents(end=5)
+    words = corpus.sents(end=10,category="quran")
     return JsonResponse(list(words), safe=False)

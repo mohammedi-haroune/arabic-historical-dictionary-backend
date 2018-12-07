@@ -1,11 +1,14 @@
 import json
 
 from django.http import HttpResponse, JsonResponse
-
-from api.models import Dictionary, Meaning, Entry
-
+#
+try:
+    from api.models import Dictionary, Meaning, Entry
+except Exception:
+    pass
 
 def addWassit(request):
+
     dictionary = Dictionary.objects.filter(name='el_wassit')
     if not dictionary:
         dictionary = Dictionary(name='el_wassit')
@@ -36,11 +39,19 @@ def entries(request):
     for element in dictionary.entry_set.all()[:100]:
         meanings = [meaning.text for meaning in element.meaning_set.all()]
         entryMap[element.term] = meanings
-    # Entry.objects.all().delete()
+    Entry.objects.all().delete()
     return JsonResponse(entryMap, safe=False)
 
+def fixWassit():
+    import re
+    words = json.loads(open("dictionaries_files/wassit.json").read())
+    words = dict([(re.sub("^(.*?)\s*$",'\1',word),words[word]) for word in words])
+    with open('dictionaries_files/wassit2.json', 'w') as fp:
+        json.dump(words, fp)
 
 
+if __name__ == '__main__':
+    fixWassit()
 
 
 
