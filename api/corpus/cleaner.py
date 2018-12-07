@@ -1,15 +1,15 @@
 import xml.etree.cElementTree as ET
-try:
-    from api.corpus.initializer import xmlDir
-    import api.corpus.basic as bs
-except ImportError:
-    from .initializer import xmlDir
-    from . import basic as bs
+# try:
+#     from api.corpus.initializer import xmlDir
+#     import api.corpus.basic as bs
+# except ImportError:
+#     from .initializer import xmlDir
+from . import basic as bs
 
-try:
-    from .HistoricalCorpus import HistoricalCorpus
-except ImportError:
-    from api.corpus.HistoricalCorpus import HistoricalCorpus
+# try:
+from .HistoricalCorpus import HistoricalCorpus
+# except ImportError:
+#     from api.corpus.HistoricalCorpus import HistoricalCorpus
 import os
 import nltk
 
@@ -118,7 +118,7 @@ def convertScrapedToXml(xmlDir='xmlCorpus'):
         json.dump(bk, fp)
 def _readXml():
     import json
-    corpus = HistoricalCorpus(xmlDir)
+    corpus = HistoricalCorpus(bs.xmlDir)
     print(len(corpus.fileids()))
     # print(corpus.sents(corpus.fileids()[1]))
     # corpus.metadata(corpus.fileids()[0])

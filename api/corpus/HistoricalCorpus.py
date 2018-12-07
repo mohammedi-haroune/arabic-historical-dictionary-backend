@@ -4,10 +4,10 @@ except ImportError: from xml.etree import ElementTree
 from nltk.corpus import XMLCorpusReader
 import nltk
 from nltk.internals import ElementWrapper
-try:
-    from api.corpus.basic import normalizeText
-except Exception:
-    from .basic import normalizeText
+# try:
+#     from api.corpus.basic import normalizeText
+# except Exception:
+from .basic import normalizeText
 from itertools import islice
 
 class Sliceable(object):

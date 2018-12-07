@@ -1,8 +1,26 @@
-try:
-    from api.corpus.initializer import eras, eraEnd, eraStart, path
-except Exception:
-    from .initializer import xmlDir, eras, mapEraToArabic
+# try:
+#     from api.corpus.initializer import eras, eraEnd, eraStart, path
+# except Exception:
+#     from .initializer import xmlDir, eras, mapEraToArabic
+import tempfile
+
 import pyarabic.araby as ar
+from pathlib import Path
+
+home = str(Path.home())
+eras = ['Jahiliy','SadrIslam','Umayyad','Abbasid','Dual','Modern']
+mapEraToArabic = {
+    eras[0]: 'العصر الجاهلي',
+    eras[1]: 'عصر صدر الإسلام',
+    eras[2]: 'عصر بني أمية',
+    eras[3]: 'عصر بني العباس',
+    eras[4]: 'عصر الدول المتتابعة',
+    eras[5]: 'العصر الحديث'
+}
+eraStart = [460,610,661,750,1258,1798]
+eraEnd = [610,661,750,1258,1798,2019]
+path = tempfile.gettempdir()+"/rawData" # where to put scraped files
+xmlDir = str(Path.home())+'/xmlCorpus'  # where to put xml files
 
 def normalizeText(content):
     content = ar.strip_tatweel(content)
