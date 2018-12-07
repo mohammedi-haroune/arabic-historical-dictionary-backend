@@ -1,14 +1,13 @@
-from rest_framework import viewsets, serializers, generics, mixins
-from rest_framework.decorators import api_view
+from rest_framework import viewsets, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.corpus import HistoricalCorpus
 from api.models import Dictionary, Entry, Meaning, Period, Document
 from api.serializers import DictionarySerializer, EntrySerializer, MeaningSerializer, PeriodSerializer, \
     DocumentSerializer
-from pathlib import Path
-from api.corpus import corpus
+
+
+from api.corpus.initializer import corpus
 # Create your views here.
 
 

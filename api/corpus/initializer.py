@@ -12,7 +12,7 @@ except Exception:
 import sys
 import getopt
 import os
-
+from .HistoricalCorpus import HistoricalCorpus
 from .basic import eras, path, xmlDir
 
 def createDirectories():
@@ -21,7 +21,7 @@ def createDirectories():
             os.makedirs(path + '/' + x)  # line B
             print(x + ' created.')
 
-def initialize():
+def initialize(light_scrape = True):
     # try:
     #     from api.corpus import islamicbook_scrape
     #     from api.corpus import news_scrape
@@ -35,15 +35,6 @@ def initialize():
     import os
 
     createDirectories()
-    light_scrape = True
-
-    options, remainder = getopt.getopt(sys.argv[1:], 'l', [])
-    for opt, arg in options:
-        if opt == '-l':
-            print('light scraping mode selected')
-            light_scrape = True
-        else:
-            print('heavy scrape mode selected')
 
     if light_scrape:
         # islamicbook_scrape.scrape_all(1)
@@ -61,6 +52,13 @@ def initialize():
     if not os.path.isdir(xmlDir):
         os.makedirs(xmlDir)  # line B
     cleaner.convertScrapedToXml(xmlDir)
+
+if not os.path.isdir(xmlDir):
+    print('Could not find corpus in', xmlDir)
+    print('Scraping started')
+    initialize()
+
+corpus = HistoricalCorpus(xmlDir)
 
 if __name__ == "__main__":
     initialize()

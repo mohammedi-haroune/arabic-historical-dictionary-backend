@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from api.models import Dictionary, Entry, Meaning, Period, Document, Appears
-from api.corpus import corpus
+from api.corpus.initializer import corpus
 
 
 # Serializers define the API representation.
