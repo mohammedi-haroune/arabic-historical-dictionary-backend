@@ -2,9 +2,19 @@ import json
 
 from django.http import HttpResponse, JsonResponse
 
-from api.corpus.HistoricalCorpus import HistoricalCorpus
+from api.corpus.farassaWrapper.farassaInterface import Farasa
 from api.models import Corpus, Document, Period
-from api.corpus.basic import xmlDir, eras, mapEraToArabic
+from api.corpus.initializer import xmlDir, corpus
+
+eras = ['Jahiliy','SadrIslam','Umayyad','Abbasid','Dual','Modern']
+mapEraToArabic = {
+    eras[0]: 'العصر الجاهلي',
+    eras[1]: 'عصر صدر الإسلام',
+    eras[2]: 'عصر بني أمية',
+    eras[3]: 'عصر بني العباس',
+    eras[4]: 'عصر الدول المتتابعة',
+    eras[5]: 'العصر الحديث'
+}
 
 
 def addDocuments(request):
@@ -39,6 +49,9 @@ def addDocuments(request):
     return HttpResponse("done!")
 
 def testDoc(request):
-    path = Corpus.objects.filter(name='الجامع الاساسي')[0].path
-    corpus = HistoricalCorpus(path)
-    return JsonResponse(corpus.sents(corpus.fileids()[0])[:100], safe=False)
+    # path = Corpus.objects.filter(name='الجامع الاساسي')[0].path
+    test = "يُشار إلى أن اللغة العربية يتحدثها أكثر من 422 مليون نسمة ويتوزع متحدثوها في المنطقة المعروفة باسم الوطن العربي بالإضافة إلى العديد من المناطق الأخرى المجاورة مثل الأهواز وتركيا وتشاد والسنغال وإريتريا وغيرها. وهي اللغة الرابعة من لغات منظمة الأمم المتحدة الرسمية الست."
+    far = Farasa()
+    res = far.lemmatize(test)
+    words = corpus.lemma_sents(end=5)
+    return JsonResponse(list(words), safe=False)

@@ -3,9 +3,12 @@ except ImportError: from xml.etree import ElementTree
 
 from itertools import islice
 
-from nltk.corpus import XMLCorpusReader
 import nltk
+from nltk.corpus import XMLCorpusReader
 from nltk.internals import ElementWrapper
+
+from .farassaWrapper.farassaInterface import Farasa
+
 
 class Sliceable(object):
     """Sliceable(iterable) is an object that wraps 'iterable' and
@@ -82,6 +85,7 @@ class HistoricalCorpus(XMLCorpusReader):
         self._booksByType = {}
         self._fileidsByIds = {}
         self._idsByfileIds = {}
+        self._far = None
         for fileid in self.fileids():
             metadata = self.metadata(fileid)
             t = metadata['type']
@@ -144,7 +148,11 @@ class HistoricalCorpus(XMLCorpusReader):
                         break
                     if cpt < start:
                         continue
-                    yield nltk.TreebankWordTokenizer().tokenize(entry.text)
+                    try:
+                        yield nltk.TreebankWordTokenizer().tokenize(entry.text)
+                    except TypeError:
+                        print(entry.text)
+                        print(fileid)
 
     def _gen_sents_class_based(self, fileid):
         metadata = self.metadata(fileid)
@@ -192,6 +200,25 @@ class HistoricalCorpus(XMLCorpusReader):
         words = [word for word in self._genWords(fileids,start,end,era=era,category=category)]
         return words
 
+    def farasa(self):
+        if not self._far:
+            self._far = Farasa()
+        return self._far
+    def tagged_sents(self,fileid=None,start=None,end=None,era=None,category=None):
+        sentences = self.sents(fileid,start,end,era,category)
+        return [list(self.farasa().tag(" ".join(s))) for s in sentences]
+
+    def tagged_words(self, fileid=None,start=None,end=None,era=None,category=None):
+        words = self.words(fileid,start,end,era,category)
+        return list(self.farasa().tag(" ".join(words)))
+
+    def lemma_sents(self,fileid=None,start=None,end=None,era=None,category=None):
+        sentences = self.sents(fileid,start,end,era,category)
+        return [list(self.farasa().lemmatize(" ".join(s))) for s in sentences]
+
+    def lemma_words(self, fileid=None,start=None,end=None,era=None,category=None):
+        words = self.words(fileid,start,end,era,category)
+        return list(self.farasa().lemmatize(" ".join(words)))
 
     def getIdFromFileid(self,fileid):
         return self._idsByfileIds[fileid]
@@ -199,23 +226,24 @@ class HistoricalCorpus(XMLCorpusReader):
     def getFileIdFromId(self,id):
         return self._fileidsByIds[id]
 
-    def words_apparitions(self,fileid=None,era=None,category=None,stop_words=None):
+    def words_apparitions(self,dictionarySet,fileid=None,era=None,category=None,stop_words=None):
         fileids = self.fileids(era,category)
         if fileid:
             fileids = [fileid]
         apparitions = {}
+        for word in dictionarySet:
+            apparitions[word] = []
         for fileid in fileids:
             id = self._idsByfileIds[fileid]
             sentences = self._genSents([fileid])
             for i,sentence in enumerate(sentences):
+                sentence = self.farasa().lemmatize(" ".join(sentence))
                 for word in sentence:
                     if stop_words and word in stop_words:
                         continue
-
-                    if word not in apparitions:
-                        apparitions[word] = [(id,i)]
-                    else:
+                    if word in apparitions:
                         apparitions[word].append((id,i))
+        apparitions = dict((w,apparitions[w]) for w in apparitions if len(apparitions[w]))
         return apparitions
 
 
