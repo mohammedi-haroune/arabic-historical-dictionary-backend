@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 class Dictionary(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
     def __str__(self):
         return self.name
     # class Meta:
@@ -26,7 +26,8 @@ class Meaning(models.Model):
     def __str__(self):
         return self.text
     # class Meta:
-    #     order_with_respect_to = 'text'
+        # order_with_respect_to = 'posTag'
+        # unique_together = ('posTag', 'entry')
 
 class Example(models.Model):
     text = models.TextField()
@@ -53,8 +54,8 @@ class Period(models.Model):
     description = models.CharField(max_length=255, default='لا توجد')
     def __str__(self):
         return self.name
-    # class Meta:
-    #     order_with_respect_to = 'name'
+    class Meta:
+        order_with_respect_to = 'name'
 
 class Document(models.Model):
     name = models.CharField(max_length=255)
@@ -73,8 +74,8 @@ class Document(models.Model):
 
     def __str__(self):
         return self.name
-    # class Meta:
-    #     order_with_respect_to = 'name'
+    class Meta:
+        order_with_respect_to = 'period'
 
 class Appears(models.Model):
     sentence = models.TextField()
