@@ -1,6 +1,6 @@
 from django.urls import path
 
-from api.fill_database import fill_wassit, fill_models, fill_documents, historicalDict
+from api.fill_database import fill_wassit, fill_models, fill_documents, historicalDict, fill_dicos
 from api.fill_database import fill_maany
 from . import process
 
@@ -21,12 +21,13 @@ router.register(r'documents', DocumentViewSet)
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
-    path('wassit',fill_wassit.addWassit, name='wassit'),
     path('entries',fill_maany.entries,name='entries'),
-    path('maany', fill_maany.addMaany, name='maany'),
     path('periods', fill_models.addPeriods, name='periods'),
     path('fill/historicDict', historicalDict.createXmlDict, name='historicDict'),
     path('fill/documents', fill_documents.addDocuments, name='documents'),
+    path('fill/dico/maany', fill_maany.maany, name='maany'),
+    path('fill/dico/wassit', fill_dicos.wassit, name='wassit'),
+    path('fill/dico/alghni', fill_dicos.elghani, name='elghani'),
     path('testDoc',fill_documents.testDoc, name='testDoc'),
     path('categories/', CategoryList.as_view()),
     path('postags/', PostagList.as_view()),
