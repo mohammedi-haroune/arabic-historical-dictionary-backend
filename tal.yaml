@@ -55,8 +55,6 @@ spec:
                 secretKeyRef:
                   name: cloudsql
                   key: password
-            - name: XML_CORPUS_DIR
-              value: '/tal/xml_corpus_dir'
             # [END cloudsql_secrets]
         ports:
         - containerPort: 8080
