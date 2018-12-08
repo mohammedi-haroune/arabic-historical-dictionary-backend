@@ -4,7 +4,7 @@ from django.http import HttpResponse, JsonResponse
 
 from api.models import Dictionary, Meaning, Entry
 
-def addMaany(request):
+def maany(request):
     dictionary = Dictionary.objects.filter(name='معجم المعاني الجامع')
     if not dictionary:
         dictionary = Dictionary(name='معجم المعاني الجامع')
