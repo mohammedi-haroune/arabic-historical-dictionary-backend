@@ -30,7 +30,6 @@ metadata:
   labels:
     app: tal
 spec:
-  replicas: 3
   template:
     metadata:
       labels:
@@ -82,7 +81,7 @@ spec:
           - name: cloudsql
             mountPath: /cloudsql
           - name: tal-disk
-            mountPath: /tal
+            mountPath: /root
 
       # [END proxy_container] 
       # [START volumes]
