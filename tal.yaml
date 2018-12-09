@@ -55,9 +55,9 @@ spec:
                 secretKeyRef:
                   name: cloudsql
                   key: password
-          volumeMounts:
-            - name: tal-disk
-              mountPath: /root
+        volumeMounts:
+          - name: tal-disk
+            mountPath: /root
             # [END cloudsql_secrets]
         ports:
         - containerPort: 8080
@@ -94,7 +94,11 @@ spec:
         - name: cloudsql
           emptyDir:
         - name: tal-disk
-          emptyDir:
+          gcePersistentDisk:
+            # This disk must already exist.
+            pdName: tal-disk
+            readOnly: true
+            fsType: ext4
         
       # [END volumes]        
 # [END kubernetes_deployment]
