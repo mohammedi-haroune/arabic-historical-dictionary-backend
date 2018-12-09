@@ -3,6 +3,11 @@
 You should keep the sql_proxy running !
 
 ```
-export DATABASE_USER=tal
+./cloud_sql_proxy -instances=arabic-historical-dictionary:us-central1:tal-sql=tcp:5432 -credential_file=credentials.json
+```
+
+Export database credentials before run `python manage.y runserver`
+```
+export DATABASE_USER=tal                           
 export DATABASE_PASSWORD=tal
-./cloud_sql_proxy -instances=arabic-historical-dictionary:us-central1:tal-sql=tcp:5432```
+```
