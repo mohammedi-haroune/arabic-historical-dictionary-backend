@@ -67,9 +67,9 @@ def elghani(request):
 
 def wassit(request):
 
-    dictionary = Dictionary.objects.filter(name='el_wassit')
+    dictionary = Dictionary.objects.filter(name='المعجم الوسيط')
     if not dictionary:
-        dictionary = Dictionary(name='el_wassit')
+        dictionary = Dictionary(name='المعجم الوسيط')
         dictionary.save()
     else:
         dictionary = dictionary[0]

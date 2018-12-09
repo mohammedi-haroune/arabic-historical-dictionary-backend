@@ -40,8 +40,8 @@ class Example(models.Model):
 
 
 class Corpus(models.Model):
-    name = models.CharField(max_length=255)
-    path = models.TextField()
+    name = models.CharField(max_length=255,unique=True)
+    path = models.TextField(unique=True)
     def __str__(self):
         return self.name
     # class Meta:
@@ -58,7 +58,7 @@ class Period(models.Model):
         order_with_respect_to = 'name'
 
 class Document(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     fileid = models.TextField(max_length=255, unique=True)
     category = models.CharField(max_length=255)
     author = models.CharField(max_length=255)
@@ -70,7 +70,7 @@ class Document(models.Model):
     entries = models.ManyToManyField(Entry,through='Appears')
 
     def sample(self, corpus):
-        return corpus.raw(fileid=self.fileid)[:200]
+        return " ".join(corpus.words(fileid=self.fileid,end=200))
 
     def __str__(self):
         return self.name
@@ -80,10 +80,12 @@ class Document(models.Model):
 class Appears(models.Model):
     sentence = models.TextField()
     confirmed = models.BooleanField(default=False)
-    position = models.BigIntegerField()
+    position = models.BigIntegerField() # sentence in which the word exists
+    word_position = models.BigIntegerField(default=-1) #position in sentence
     document = models.ForeignKey(Document,on_delete=models.CASCADE)
     entry = models.ForeignKey(Entry,on_delete=models.CASCADE)
     def __str__(self):
         return self.sentence
-    # class Meta:
+    class Meta:
+        unique_together = ('position', 'word_position', 'document')
     #     order_with_respect_to = 'sentence'

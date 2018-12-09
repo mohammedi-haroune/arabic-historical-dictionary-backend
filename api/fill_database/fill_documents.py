@@ -57,6 +57,17 @@ def addDocuments(request):
     return HttpResponse("done!")
 
 def testDoc(request):
+    import nltk
     # path = Corpus.objects.filter(name='الجامع الاساسي')[0].path
-    words = corpus.sents(end=10,category="quran")
-    return JsonResponse(list(words), safe=False)
+    documents = Document.objects.all()
+    documents = [(document.name,(document.fileid,document.category)) for document in documents]
+    cfd = nltk.ConditionalFreqDist(documents)
+    freqs = [cond for cond in cfd.keys() if len(cfd[cond]) > 1]
+    res = dict((key,list(cfd[key])) for key in freqs)
+    categories = list(set(list(cfd[key])[0][1] for key in freqs))
+    qur = dict((key,res[key]) for key in res if res[key][0][1] == 'quran')
+    # duplicated = set([(document.name,document.fileid)
+    #               for d in documents
+    #                 for document in documents
+    #                     if document != d and document.name == d.name])
+    return JsonResponse([categories,qur,res], safe=False)
