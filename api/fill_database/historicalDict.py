@@ -1,12 +1,18 @@
+import json
+
 from django.http import JsonResponse
 
 from api.corpus.initializer import corpus
-from api.models import Dictionary, Entry
 
 
 def createXmlDict(request):
-    dictionary = Dictionary.objects.filter(name='المعجم الوسيط')[0]
-    entries = Entry.objects.filter(dictionary=dictionary)
-    entries = [entry.term for entry in entries]
+    # dictionary = Dictionary.objects.filter(name='المعجم الوسيط')[0]
+    # entries = Entry.objects.filter(dictionary=dictionary)
+    entries = json.loads(open("dicts/wassit.json").read())
+    entries = [entry for entry in entries]
     apps = corpus.words_apparitions(set(entries))
-    return JsonResponse(apps,safe=False)
+    print(len(apps))
+    # return JsonResponse(apps,safe=False)
+
+if __name__ == '__main__':
+    createXmlDict(None)
