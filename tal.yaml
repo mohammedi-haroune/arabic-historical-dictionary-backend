@@ -55,6 +55,9 @@ spec:
                 secretKeyRef:
                   name: cloudsql
                   key: password
+          volumeMounts:
+            - name: tal-disk
+              mountPath: /root
             # [END cloudsql_secrets]
         ports:
         - containerPort: 8080
@@ -78,8 +81,6 @@ spec:
             mountPath: /etc/ssl/certs
           - name: cloudsql
             mountPath: /cloudsql
-          - name: tal-disk
-            mountPath: /root
 
       # [END proxy_container] 
       # [START volumes]
