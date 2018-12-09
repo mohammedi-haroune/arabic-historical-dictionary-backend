@@ -162,7 +162,7 @@ CORS_ALLOW_METHODS = (
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = False
-CORS_ORIGIN_WHITELIST = ('127.0.0.1:8080', 'localhost:8080')
+CORS_ORIGIN_WHITELIST = ('127.0.0.1:8080', 'localhost:8080', 'tal-frontend.default.svc.cluster.local')
 CORS_ALLOW_HEADERS = (
     'accept',
     'accept-encoding',
