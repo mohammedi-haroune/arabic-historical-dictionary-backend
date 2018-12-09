@@ -35,14 +35,44 @@ def addMaany(request):
 
 
 def elghani(request):
-    dictionary = Dictionary.objects.filter(name='المعجم الغانى')
+    dictionary = Dictionary.objects.filter(name='المعجم الغني')
     if not dictionary:
-        dictionary = Dictionary(name='المعجم الغانى')
+        dictionary = Dictionary(name='المعجم الغني')
         dictionary.save()
     else:
         dictionary = dictionary[0]
 
     words = json.loads(open('api/fill_database/dicts/elghani.json').read())
+
+    created_words = [entry.term for entry in Entry.objects.filter(dictionary=dictionary)]
+
+    wordsToCreate = [Entry(term=key, dictionary=dictionary) for key in words if key not in created_words]
+
+    meaningsToCreate = []
+    Entry.objects.bulk_create(wordsToCreate)
+    wordsMap = dict([(entry.term, entry) for entry in Entry.objects.all()])
+    for key in words:
+        word = wordsMap[key]
+        # wordsToCreate.append(word)
+        for postag in words[key]:
+            meanings = words[key][postag]
+            for mean in meanings:
+                meaning = Meaning(text=mean, entry_id=word.pk,posTag=postag)
+                meaningsToCreate.append(meaning)
+                # word.meaning_set.add(Meaning(text=mean, entry=word))
+
+    Meaning.objects.bulk_create(meaningsToCreate)
+    return HttpResponse("done!")
+
+def elraeid(request):
+    dictionary = Dictionary.objects.filter(name='المعجم الرائد')
+    if not dictionary:
+        dictionary = Dictionary(name='المعجم الرائد')
+        dictionary.save()
+    else:
+        dictionary = dictionary[0]
+
+    words = json.loads(open('api/fill_database/dicts/elra2id.json').read())
 
     created_words = [entry.term for entry in Entry.objects.filter(dictionary=dictionary)]
 
@@ -74,7 +104,7 @@ def wassit(request):
     else:
         dictionary = dictionary[0]
 
-    words = json.loads(open("api/fill_database/dictionaries_files/wassit.json").read())
+    words = json.loads(open("api/fill_database/dicts/wassit.json").read())
     wordsToCreate = [Entry(term=key, dictionary=dictionary) for key in words]
 
     meaningsToCreate = []

@@ -28,6 +28,7 @@ urlpatterns = [
     path('fill/dico/maany', fill_maany.maany, name='maany'),
     path('fill/dico/wassit', fill_dicos.wassit, name='wassit'),
     path('fill/dico/alghni', fill_dicos.elghani, name='elghani'),
+    path('fill/dico/alraeid', fill_dicos.elraeid, name='elraeid'),
     path('testDoc',fill_documents.testDoc, name='testDoc'),
     path('categories/', CategoryList.as_view()),
     path('postags/', PostagList.as_view()),

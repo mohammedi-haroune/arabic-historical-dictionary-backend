@@ -16,7 +16,7 @@ def addWassit(request):
     else:
         dictionary = dictionary[0]
 
-    words = json.loads(open("api/fill_database/dictionaries_files/wassit2.json").read())
+    words = json.loads(open("api/fill_database/dictionaries_files/wassit.json").read())
     wordsToCreate = [Entry(term=key, dictionary=dictionary) for key in words]
 
     meaningsToCreate = []
@@ -42,16 +42,8 @@ def entries(request):
     Entry.objects.all().delete()
     return JsonResponse(entryMap, safe=False)
 
-def fixWassit():
-    import re
-    words = json.loads(open("dictionaries_files/wassit.json").read())
-    words2 = json.loads(open("dictionaries_files/wassit2.json").read())
-    print(len(words))
-    print(len(words2))
 
 
-if __name__ == '__main__':
-    fixWassit()
 
 
 
