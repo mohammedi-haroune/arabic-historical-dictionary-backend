@@ -74,6 +74,7 @@ metadata:
     app: tal-backend
 spec:
   type: LoadBalancer
+  loadBalancerIP: "35.211.169.197"
   ports:
   - port: 80
     targetPort: 8080
