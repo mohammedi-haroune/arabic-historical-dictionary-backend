@@ -57,7 +57,7 @@ spec:
         - name: tal-disk
           gcePersistentDisk:
             # This disk must already exist.
-            pdName: tal-disk
+            pdName: tal-disk-europe
             readOnly: true
             fsType: ext4
 
