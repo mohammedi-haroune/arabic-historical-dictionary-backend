@@ -51,8 +51,11 @@ def addDocuments(request):
         death_date=str(doc['author']['death']),
         corpus=corpus,
         period=getPeriod(periods,doc['era'])) for doc in documents]
-
-    meaningsToCreate = []
+    # for document in documentsToCreate:
+    #     try:
+    #         document.save()
+    #     except Exception as e:
+    #         print('ERROR IN FILLING DOCUMENT: ',document.name,' IS DOUBLED ', e)
     Document.objects.bulk_create(documentsToCreate)
     return HttpResponse("done!")
 

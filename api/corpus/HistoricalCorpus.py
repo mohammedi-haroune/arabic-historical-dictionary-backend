@@ -83,6 +83,8 @@ class HistoricalCorpus(XMLCorpusReader):
         super().__init__(root, fileids, wrap_etree)
         self._booksByEra = {}
         self._booksByType = {}
+        self._eras = []
+        self._categories = []
         self._fileidsByIds = {}
         self._idsByfileIds = {}
         self._far = None
@@ -91,7 +93,10 @@ class HistoricalCorpus(XMLCorpusReader):
             t = metadata['type']
             era = metadata['era']
             id = metadata['id']
-
+            if era not in self._eras:
+                self._eras.append(era)
+            if t not in self._categories:
+                self._categories.append(t)
             self._fileidsByIds[id] = fileid
             self._idsByfileIds[fileid] = id
 
@@ -104,6 +109,12 @@ class HistoricalCorpus(XMLCorpusReader):
             else:
                 self._booksByType[t] = [fileid]
 
+
+    def eras(self):
+        return self._eras
+
+    def categories(self):
+        return self._categories
 
     def xml(self, fileid=None):
         # Make sure we have exactly one file -- no concatenating XML.
@@ -153,6 +164,8 @@ class HistoricalCorpus(XMLCorpusReader):
                     except TypeError:
                         print(entry.text)
                         print(fileid)
+                entry.clear()
+
 
     def _gen_sents_class_based(self, fileid):
         metadata = self.metadata(fileid)
@@ -226,23 +239,45 @@ class HistoricalCorpus(XMLCorpusReader):
     def getFileIdFromId(self,id):
         return self._fileidsByIds[id]
 
-    def words_apparitions(self,dictionarySet,fileid=None,era=None,category=None,stop_words=None):
-        fileids = self.fileids(era,category)
+    def word_apparitions_gen(self,dictionarySet,fileid=None,era=None,
+                          category=None,stop_words=None,get_sentences=False,context_size=5):
+        if stop_words is None:
+            stop_words = set(nltk.corpus.stopwords.words("arabic"))
+        fileids = self.fileids(era, category)
         if fileid:
             fileids = [fileid]
-        apparitions = {}
-        for word in dictionarySet:
-            apparitions[word] = []
         for fileid in fileids:
+            print('INFO APPAREATIONS: FINDING FOR FILEID ',fileid)
             id = self._idsByfileIds[fileid]
             sentences = self._genSents([fileid])
-            for i,sentence in enumerate(sentences):
-                sentence = self.farasa().lemmatize(" ".join(sentence))
-                for word in sentence:
+            i = 0
+            for sentence in sentences:
+                lsentence = self.farasa().lemmatize(" ".join(sentence))
+                pos = 0
+                for word in lsentence:
+                    pos += 1
                     if stop_words and word in stop_words:
                         continue
-                    if word in apparitions:
-                        apparitions[word].append((id,i))
+                    if word in dictionarySet:
+
+                        if get_sentences:
+                            low = max([0, pos - context_size])
+                            high = min([len(sentence) - 1, pos + context_size])
+                            out_sentence = sentence[low:high]
+                            yield word,{"file_id": id, "sentence_pos": i,
+                                    "word_pos": pos,'sentence':" ".join(out_sentence)}
+                        else:
+                            yield word,{"file_id": id, "sentence_pos": i,"word_pos": pos}
+                i += 1
+    def words_apparitions(self,dictionarySet,fileid=None,era=None,
+                          category=None,stop_words=None,get_sentences=False,context_size=5):
+        apparitions = {}
+        for w,info in self.word_apparitions_gen(dictionarySet,fileid,era,category,
+                                                stop_words,get_sentences,context_size):
+            if w in apparitions:
+                apparitions[w].append(info)
+            else:
+                apparitions[w] = [info]
         apparitions = dict((w,apparitions[w]) for w in apparitions if len(apparitions[w]))
         return apparitions
 

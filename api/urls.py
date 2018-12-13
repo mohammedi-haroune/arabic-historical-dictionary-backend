@@ -23,7 +23,10 @@ router.register(r'documents', DocumentViewSet)
 urlpatterns = [
     path('entries',fill_maany.entries,name='entries'),
     path('periods', fill_models.addPeriods, name='periods'),
-    path('fill/historicDict', historicalDict.createXmlDict, name='historicDict'),
+    path('delete/appears', historicalDict.emptyAppears, name='delete_word_appears'),
+    path('delete/wordAppears', historicalDict.emptyWordAppears, name='delete_appears'),
+    path('fill/historicDict', historicalDict.fillHistoricDict, name='historicDict'),
+    path('fill/wordAppears', historicalDict.fillWordAppears, name='wordAppears'),
     path('fill/documents', fill_documents.addDocuments, name='documents'),
     path('fill/dico/maany', fill_maany.maany, name='maany'),
     path('fill/dico/wassit', fill_dicos.wassit, name='wassit'),
