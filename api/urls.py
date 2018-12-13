@@ -21,7 +21,9 @@ router.register(r'documents', DocumentViewSet)
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
-    path('entries',fill_maany.entries,name='entries'),
+    path('entries', fill_maany.entries, name='entries'),
+    path('statistics', historicalDict.getStatistics, name='stats'),
+    path('statistics/word',historicalDict.getWordStatistics,name='word_stats'),
     path('delete/appears', historicalDict.emptyAppears, name='delete_word_appears'),
     path('delete/wordAppears', historicalDict.emptyWordAppears, name='delete_appears'),
     path('delete/documents', fill_documents.emptyDocuments, name='delete_documents'),

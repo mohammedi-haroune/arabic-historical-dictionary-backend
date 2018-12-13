@@ -25,7 +25,8 @@ class Meaning(models.Model):
 
     def __str__(self):
         return self.text
-    # class Meta:
+    class Meta:
+        ordering = ('entry',)
         # order_with_respect_to = 'posTag'
         # unique_together = ('posTag', 'entry')
 
@@ -75,6 +76,7 @@ class Document(models.Model):
 
     def __str__(self):
         return self.name
+
     # class Meta:
     #     order_with_respect_to = 'period'
 
@@ -87,6 +89,7 @@ class Appears(models.Model):
     meaning = models.ForeignKey(Meaning,on_delete=models.CASCADE)
     def __str__(self):
         return self.meaning.entry.term + ": " + self.sentence
+
     # class Meta:
     #     unique_together = ('position', 'word_position', 'document')
     #     order_with_respect_to = 'sentence'
