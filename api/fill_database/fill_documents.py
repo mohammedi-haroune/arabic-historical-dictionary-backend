@@ -3,23 +3,31 @@ import json
 from django.http import HttpResponse, JsonResponse
 
 from api.corpus.farassaWrapper.farassaInterface import Farasa
+from api.fill_database import fill_models
 from api.models import Corpus, Document, Period
 from api.corpus.initializer import xmlDir, corpus
 
-eras = ['Jahiliy','SadrIslam','Umayyad','Abbasid','Dual','Modern']
+eras = ['Jahiliy','SadrIslam','Umayyad','Abbasid','Dual','Modern','all']
 mapEraToArabic = {
     eras[0]: 'العصر الجاهلي',
     eras[1]: 'عصر صدر الإسلام',
     eras[2]: 'عصر بني أمية',
     eras[3]: 'عصر بني العباس',
     eras[4]: 'عصر الدول المتتابعة',
-    eras[5]: 'العصر الحديث'
+    eras[5]: 'العصر الحديث',
+    eras[6]: "كل الأوقات"
 }
+
+mapEraToEnglish = dict((mapEraToArabic[era],era) for era in eras)
 
 def getPeriod(periods,key):
     if key in periods:
         return periods[key]
     return None
+
+def emptyDocuments(request):
+    Document.objects.all().delete()
+    return JsonResponse(['done'], safe=False)
 
 def addDocuments(request):
     corpus = Corpus.objects.filter(path=xmlDir,name='الجامع الاساسي')
@@ -29,19 +37,24 @@ def addDocuments(request):
     else:
         corpus = corpus[0]
 
+    emptyDocuments(request)
     documents = json.loads(open(xmlDir+"/books_description.json").read())
-    periods = {}
-    for era in eras:
-        period = Period.objects.filter(name=mapEraToArabic[era])
-        if not period:
-            raise Exception('looking for era' + era + "which doesn't exist")
-        else:
-            period = period[0]
-        periods[era] = period
-    period = Period.objects.filter(name="كل الأوقات")
-    if not period:
-        raise Exception("couldn't find era كل الأوقات")
-    periods['all'] = period[0]
+    periods = Period.objects.all()
+    if not periods or not len(periods):
+        fill_models.addPeriods(request)
+        periods = Period.objects.all()
+    periods = dict((mapEraToEnglish[period.name],period) for period in periods)
+    # for era in eras:
+    #     period = Period.objects.filter(name=mapEraToArabic[era])
+    #     if not period:
+    #         print('INFO FILL DOCUMENTS: LOOKING FOR ERA ' + era + " WHICH DOESN'T EXIST")
+    #     else:
+    #         period = period[0]
+    #     periods[era] = period
+    # period = Period.objects.filter(name="كل الأوقات")
+    # if not period:
+    #     raise Exception("couldn't find era كل الأوقات")
+    # periods['all'] = period[0]
     documentsToCreate = [Document(
         name=doc['book_name'],
         fileid=doc['fileid'],

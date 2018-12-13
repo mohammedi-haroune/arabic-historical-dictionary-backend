@@ -22,10 +22,11 @@ router.register(r'documents', DocumentViewSet)
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
     path('entries',fill_maany.entries,name='entries'),
-    path('periods', fill_models.addPeriods, name='periods'),
     path('delete/appears', historicalDict.emptyAppears, name='delete_word_appears'),
     path('delete/wordAppears', historicalDict.emptyWordAppears, name='delete_appears'),
-    path('fill/historicDict', historicalDict.fillHistoricDict, name='historicDict'),
+    path('delete/documents', fill_documents.emptyDocuments, name='delete_documents'),
+    path('fill/periods', fill_models.addPeriods, name='periods'),
+    # path('fill/historicDict', historicalDict.fillHistoricDict, name='historicDict'),
     path('fill/wordAppears', historicalDict.fillWordAppears, name='wordAppears'),
     path('fill/documents', fill_documents.addDocuments, name='documents'),
     path('fill/dico/maany', fill_maany.maany, name='maany'),
