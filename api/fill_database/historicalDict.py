@@ -3,7 +3,11 @@ import json
 import os
 import random
 from json.decoder import WHITESPACE
-from api.models import Entry, Appears, Document, WordAppear
+
+from django.core.paginator import Paginator
+from django.db import connection
+
+from api.models import Entry, Appears, Document, WordAppear, Meaning
 
 try: from xml.etree import cElementTree as ET
 except ImportError: from xml.etree import ElementTree as ET
@@ -52,14 +56,7 @@ def getStatistics(request):
     statistics = getGlobalStatistics(apps,apps)
 
 
-def fillHistoricDict(request):
-    refresh = False
-    if request.method == 'GET':
-        get = request.GET
-        if 'refresh' in get:
-            refresh = get['refresh'][0]
 
-    return fillHistoric(refresh)
 
 def emptyAppears(request):
     Appears.objects.all().delete()
@@ -76,7 +73,6 @@ def fillWordAppears(request):
         if 'batch' in get:
             batch = get['batch'][0]
     emptyWordAppears(request)
-    # entries = json.loads(open("api/fill_database/dicts/wassit.json").read())
     print("INFO FILL WORD APPEARS: LOADING ENTRIES...")
     entries = Entry.objects.all()
     entries = dict((entry.term, entry) for entry in entries)
@@ -92,10 +88,6 @@ def fillWordAppears(request):
     print("INFO FILL WORD APPEARS: STARTS FILLING...")
     for w,value in apps:
         entry = entries[w]
-        # if not entry:
-        #     print("WARNING FILL HISTORIC DICT: ENTRY EXISTS IN DISK'S JSON BUT NOT IN DATABASE")
-        #     continue
-        # entry = entry[0] #link first instance of entry and first meaning of it
         fileid = corpus.getFileIdFromId(value['file_id'])
 
         if fileid not in documents:
@@ -103,9 +95,6 @@ def fillWordAppears(request):
             continue
         document = documents[fileid]
         try:
-            # meaning = entry.meaning_set.all()
-            # index = random.randrange(len(meaning))
-            # meaning = meaning[index]
             sentence = value['sentence']
             appears.append(WordAppear(
                 sentence=sentence,
@@ -133,52 +122,61 @@ def fillWordAppears(request):
         print('INFO FILL WORD APPEARS: WORDAPPEAR CREATED BULK')
     return JsonResponse(['done'], safe=False)
 
+
+def fillHistoricDict(request):
+    emptyAppears(request=request)
+    refresh = False
+    if request.method == 'GET':
+        get = request.GET
+        if 'refresh' in get:
+            refresh = get['refresh'][0]
+
+    return fillHistoric(refresh)
+
+def genAppears(batch=10000):
+    paginator = Paginator(WordAppear.objects.all(),batch)
+    for p in paginator.page_range:
+        print("INFO FILL HISTORIC DICT: LOADING APPEARS PAGE ",p)
+        for appear in paginator.get_page(p):
+            yield appear
+
 def fillHistoric(refresh,limit=-1):
-    apps = getAppearances(True,refresh)
+
+    # entries = json.loads(open("api/fill_database/dicts/wassit.json").read())
+    print("INFO FILL HISTORIC DICT: LOADING DOCUMENTS...")
+    documents = Document.objects.all()
+    documents = dict((document.pk, document) for document in documents)
+    print("INFO FILL HISTORIC DICT: LOADING MEANINGS...")
+    meaningsql = Meaning.objects.all()
+    meanings = {}
+    count = 0
+    for meaning in meaningsql:
+        count += 1
+        print("INFO FILL HISTORIC DICT: LOADING MEANINGS...", count)
+        if meaning.entry_id in meanings:
+            meanings[meaning.entry_id].append(meaning)
+        else:
+            meanings[meaning.entry_id] = [meaning]
     appears = []
     count = 0
 
-    for w,apparitions in apps.items():
-        entry = Entry.objects.filter(term=w)
-        if not entry:
-            print("WARNING FILL HISTORIC DICT: ENTRY EXISTS IN DISK'S JSON BUT NOT IN DATABASE")
+    for wordAppear in genAppears():
+        # print(connection.queries[-1])
+        if wordAppear.entry_id not in meanings:
+            print("WARNING FILL HISTORIC DICT: ENTRY IN APPEAR NOT IN MEANING", wordAppear.entry_id)
             continue
-        entry = entry[0] #link first instance of entry and first meaning of it
-        setLimit = limit
-        fileids = [corpus.getFileIdFromId(value['file_id']) for value in apparitions]
-        documents = Document.objects.filter(fileid__in=fileids)
-        documents = dict((document.fileid,document) for document in documents)
-        if len(documents) != len(set(fileids)):
-            print("WARNING FILL HISTORIC DICT: DOCUMENT EXISTS IN CORPUS BUT NOT IN DATABASE")
-            print("LENGTH DOCUMENTS", len(documents), " LENGTH FILEIDS", len(fileids))
-            print(fileids)
-            print(documents)
-            continue
-        for value in apparitions:
-            fileid = corpus.getFileIdFromId(value['file_id'])
-            document = documents[fileid]
-            try:
-                meaning = entry.meaning_set.all()
-                index = random.randrange(len(meaning))
-                meaning = meaning[index]
-                sentence = value['sentence']
-                appears.append(Appears(
-                    sentence=sentence,
-                    position=value['sentence_pos'],
-                    word_position=value['word_pos'],
-                    document=document,
-                    meaning=meaning
-                ))
-
-                count += 1
-                setLimit -= 1
-                print('INFO FILL HISTORIC DICT: APPEAR APPENDED', count)
-                if not setLimit:
-                    break
-            except Exception as e:
-                print("ERROR FILL HISTORIC DICT: ENTRY WITHOUT MEANING",entry, e)
-                print(document,entry)
-                print(value['sentence_pos'],value['word_pos'])
+        means = meanings[wordAppear.entry_id]
+        meaning = means[random.randrange(0,len(means))]
+        document = documents[wordAppear.document_id]
+        appears.append(Appears(
+            sentence=wordAppear.sentence,
+            position=wordAppear.position,
+            word_position=wordAppear.word_position,
+            document=document,
+            meaning=meaning
+        ))
+        count += 1
+        print('INFO FILL HISTORIC DICT: APPEAR APPENDED ', count)
 
     if len(appears):
         Appears.objects.bulk_create(appears)
@@ -186,6 +184,7 @@ def fillHistoric(refresh,limit=-1):
     return JsonResponse(['done'],safe=False)
 
 def getAppearances(get_sents,refresh=False):
+
     root = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
     file = root+'/apps'
     if get_sents:
