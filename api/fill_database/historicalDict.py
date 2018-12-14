@@ -16,30 +16,45 @@ from django.http import JsonResponse
 
 from api.corpus.initializer import corpus
 
-def _createXml(path,name,author,type,savePath,era,id):
-    root = ET.Element("root",encoding='utf-8')
-    metaData = ET.SubElement(root,'statistics')
-    ET.SubElement(metaData, 'number_of_terms').text = name
-    ET.SubElement(metaData, 'era').text = era
-    auth = ET.SubElement(metaData, 'author')
-    ET.SubElement(auth, 'name').text = author['name']
-    ET.SubElement(auth, 'birth').text = str(author['birth'])
-    ET.SubElement(auth, 'death').text = str(author['death'])
-    ET.SubElement(metaData,'id').text = str(id)
-    ET.SubElement(metaData, 'type').text = type
+def export_dict_Xml(request):
+    refresh = False
+    if request.method == 'GET':
+        get = request.GET
+        if 'refresh' in get:
+            refresh = get['refresh'][0]
+    stats = getGlobalStatistics(refresh)
+    root = ET.Element("historical_dict",encoding='utf-8')
+    metaData = ET.SubElement(root,'global_info')
+    ET.SubElement(metaData, 'number_of_terms').text = str(stats['number_of_terms'])
+    ET.SubElement(metaData, 'number_of_documents').text = str(stats['number_of_docs'])
+    ET.SubElement(metaData, 'number_of_examples').text = str(stats['total_registered_appears'])
+    apps = genAppears()
+    prev = None
+    print("INFO EXPORT XML: LOADING ENTRIES...")
+    entries = Entry.objects.all()
+    entries = dict((entry.pk, entry) for entry in entries)
+    ents = ET.SubElement(root, 'entries')
+
+    for appears in apps:
+        meaning = appears.meaning
+        entry = entries[meaning.entry_id]
+
+        if entry.term != prev:
+            entry_tag = ET.SubElement(ents,'entry',term=entry.term)
+            prev = entry.term
 
 
-    # print(str(len(sentences)))
+            # print(str(len(sentences)))
 
 
     tree = ET.ElementTree(root)
-    savePath = savePath+'/'+type
-    filepath = savePath+'/'+name+".xml"
+    filepath = "historical_dict.xml"
     tree.write(filepath)
-    return filepath
+    return JsonResponse(['done'],safe=False)
 
 def genAppears(batch=50000):
-    paginator = Paginator(Appears.objects.select_related().all(),batch)
+    paginator = Paginator(Appears.objects.select_related().all()
+                          .order_by('meaning__entry'),batch)
     for p in paginator.page_range:
         print("INFO: LOADING APPEARS PAGE ",p)
         for appear in paginator.get_page(p):
@@ -91,10 +106,16 @@ def getGlobalStatistics(refresh=False):
     periods = Period.objects.all()
     periods = dict((period.pk, period) for period in periods)
     stats = dict((mapEraToArabic[e], dict((c, 0) for c in corpus.categories()))
-                                        for e in corpus.eras())
+                 for e in corpus.eras())
+    doc_stats = dict((mapEraToArabic[e], dict((c, 0) for c in corpus.categories()))
+                 for e in corpus.eras())
     print("INFO GET STATISTICS: LOADING DOCUMENTS...")
     documents = Document.objects.all()
     documents = dict((document.pk, document) for document in documents)
+    for document in documents.values():
+        category = document.category
+        era = periods[document.period_id].name
+        doc_stats[era][category] += 1
     count = 0
     for appears in apps:
         document = documents[appears.document_id]
@@ -103,10 +124,17 @@ def getGlobalStatistics(refresh=False):
         stats[era][category] += 1
         count += 1
         print("INFO GET STATISTICS: ADDED APPEAR TO STATS...",count)
+    global_stats = {
+        'number_of_docs': len(documents),
+        'number_of_terms': len(Entry.objects.all()),
+        'total_registered_appears': count,
+        'doc_stats': doc_stats,
+        'appears_stats': stats
+    }
     with open(file, 'w') as fp:
-        json.dump(stats, fp)
+        json.dump(global_stats, fp)
     print('INFO GET STATISTICS: FINISHED REFRESHING')
-    return stats
+    return global_stats
 def getStatistics(request):
     refresh = False
     if request.method == 'GET':

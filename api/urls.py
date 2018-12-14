@@ -22,7 +22,7 @@ router.register(r'documents', DocumentViewSet)
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
     path('entries', fill_maany.entries, name='entries'),
-    #api/statistics to get global statistics
+    #api/statistics to get global statistics set ?refresh=1 to refresh statistics
     path('statistics', historicalDict.getStatistics, name='stats'),
     #api/statistics/word?term=t1 to get statistics regarding t1's meanings
     path('statistics/word',historicalDict.getWordStatistics,name='word_stats'),
