@@ -28,5 +28,20 @@ ADD requirements.txt /app/requirements.txt
 RUN /env/bin/pip install --upgrade pip && /env/bin/pip install -r /app/requirements.txt
 ADD . /app
 
-CMD gunicorn -b :$PORT arabic_historical_dictionary_backend.wsgi
+# Install OpenJDK-8
+RUN apt-get update && \
+apt-get install -y openjdk-8-jdk && \
+apt-get install -y ant && \
+apt-get clean;
+
+# Fix certificate issues
+RUN apt-get update && \
+apt-get install ca-certificates-java && \
+apt-get clean && \
+update-ca-certificates -f;
+# Setup JAVA_HOME -- useful for docker commandline
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
+RUN export JAVA_HOME
+
+CMD gunicorn -b :$PORT arabic_historical_dictionary_backend.wsgi --log-level debug --workers 4 --timeout 120
 # [END docker]
