@@ -43,5 +43,5 @@ update-ca-certificates -f;
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
 RUN export JAVA_HOME
 
-CMD gunicorn -b :$PORT arabic_historical_dictionary_backend.wsgi --log-level debug --workers 4 --timeout 120
+CMD gunicorn -b :$PORT arabic_historical_dictionary_backend.wsgi --log-level debug --workers 4 --timeout 120 -k eventlet
 # [END docker]
