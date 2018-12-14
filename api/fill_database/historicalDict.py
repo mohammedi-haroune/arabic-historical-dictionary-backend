@@ -25,32 +25,67 @@ def export_dict_Xml(request):
     stats = getGlobalStatistics(refresh)
     root = ET.Element("historical_dict",encoding='utf-8')
     metaData = ET.SubElement(root,'global_info')
-    ET.SubElement(metaData, 'number_of_terms').text = str(stats['number_of_terms'])
-    ET.SubElement(metaData, 'number_of_documents').text = str(stats['number_of_docs'])
-    ET.SubElement(metaData, 'number_of_examples').text = str(stats['total_registered_appears'])
+    num_terms = ET.SubElement(metaData, 'num_terms').text = str(stats['number_of_terms'])
+    ET.SubElement(metaData, 'num_docs').text = str(stats['number_of_docs'])
+    ET.SubElement(metaData, 'num_examples').text = str(stats['total_registered_appears'])
     apps = genAppears()
     prev = None
     print("INFO EXPORT XML: LOADING ENTRIES...")
     entries = Entry.objects.all()
     entries = dict((entry.pk, entry) for entry in entries)
     ents = ET.SubElement(root, 'entries')
-    means = []
+    means = {}
     app = []
+    countm = 1
+    count = 0
     for appears in apps:
         meaning = appears.meaning
         entry = entries[meaning.entry_id]
+        print("INFO EXPORT XML: NEW APPEAR", entry.term, prev)
         if entry.term != prev:
             if prev is not None:
                 entry_tag = ET.SubElement(ents, 'entry', term=entry.term)
-                prev = entry.term
-                for m in means:
-                    ET.SubElement(entry_tag, 'm', postag=meaning.posTag).text = m.text
+                means_tag = ET.SubElement(entry_tag, 'meanings')
+                for i,m in sorted(means.values(),key=lambda x:x[0]):
+                    ET.SubElement(means_tag, 'm', postag=m.posTag, id=str(i)).text = m.text
+                exam_tag = ET.SubElement(entry_tag, 'examples')
                 for a in app:
-                    ET.SubElement(entry_tag, 'a')
+                    appears = a['appears']
+                    atag = ET.SubElement(exam_tag, 'a', meaning_id=str(a['m']),
+                                         sentence=str(appears.position),
+                                 word_pos=str(appears.word_position))
+                    ET.SubElement(atag,'doc').text = appears.document.fileid
+                    ET.SubElement(atag,'sample_text').text = appears.sentence
+                    ET.SubElement(atag,'confirmed').text = str(appears.confirmed)
+                count += 1
+                print("INFO EXPORT XML: ADDED ENTRY", count)
+            means = {}
+            app = []
+            countm = 0
+            prev = entry.term
+        if meaning.pk not in means:
+            means[meaning.pk] = (countm,meaning)
+            countm += 1
 
+        app.append({'m':means[meaning.pk][0],'appears':appears})
+    if len(app):
+        entry_tag = ET.SubElement(ents, 'entry', term=entry.term)
+        means_tag = ET.SubElement(entry_tag, 'meanings')
+        for i, m in sorted(means.values(), key=lambda x: x[0]):
+            ET.SubElement(means_tag, 'm', postag=m.posTag, id=str(i)).text = m.text
+        exam_tag = ET.SubElement(entry_tag, 'examples')
+        for a in app:
+            appears = a['appears']
+            atag = ET.SubElement(exam_tag, 'a', meaning_id=str(a['m']), sentence=str(appears.position),
+                                 word_pos=str(appears.word_position))
+            ET.SubElement(atag, 'doc').text = appears.document.fileid
+            ET.SubElement(atag, 'sample_text').text = appears.sentence
+            ET.SubElement(atag, 'confirmed').text = str(appears.confirmed)
+        count += 1
+        print("INFO EXPORT XML: ADDED ENTRY", count)
             # print(str(len(sentences)))
 
-
+    num_terms = count
     tree = ET.ElementTree(root)
     filepath = "historical_dict.xml"
     tree.write(filepath)

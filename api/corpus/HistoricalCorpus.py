@@ -1,3 +1,5 @@
+import os
+import inspect
 try: from xml.etree import cElementTree as ElementTree
 except ImportError: from xml.etree import ElementTree
 
@@ -242,7 +244,10 @@ class HistoricalCorpus(XMLCorpusReader):
     def word_apparitions_gen(self,dictionarySet,fileid=None,era=None,
                           category=None,stop_words=None,get_sentences=False,context_size=5):
         if stop_words is None:
-            stop_words = set(nltk.corpus.stopwords.words("arabic"))
+            root = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+            stop_words = root+'/stop_words'
+            stop_words = open(stop_words,'r').readlines()
+            stop_words = set(stop_word[:-1] for stop_word in stop_words)
         fileids = self.fileids(era, category)
         if fileid:
             fileids = [fileid]
