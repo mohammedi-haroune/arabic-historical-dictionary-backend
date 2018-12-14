@@ -29,16 +29,21 @@ def emptyDocuments(request):
     Document.objects.all().delete()
     return JsonResponse(['done'], safe=False)
 
+def emptyCorpus(request):
+    Corpus.objects.all().delete()
+    return JsonResponse(['done'], safe=False)
+
 def addDocuments(request):
-    corpus = Corpus.objects.filter(path=xmlDir,name='الجامع الاساسي')
-    if not corpus:
-        corpus = Corpus(path=xmlDir,name='الجامع الاساسي')
-        corpus.save()
+    corp = Corpus.objects.filter(path=xmlDir,name='الجامع الاساسي')
+    if not corp:
+        corp = Corpus(path=xmlDir,name='الجامع الاساسي')
+        corp.save()
     else:
-        corpus = corpus[0]
+        corp = corp[0]
 
     emptyDocuments(request)
     documents = json.loads(open(xmlDir+"/books_description.json").read())
+    documents = corpus.booksDescription()
     periods = Period.objects.all()
     if not periods or not len(periods):
         fill_models.addPeriods(request)
@@ -55,15 +60,19 @@ def addDocuments(request):
     # if not period:
     #     raise Exception("couldn't find era كل الأوقات")
     # periods['all'] = period[0]
-    documentsToCreate = [Document(
+    documentsToCreateb = [Document(
         name=doc['book_name'],
         fileid=doc['fileid'],
         category=doc['type'],
         author=doc['author']['name'],
         birth_date=str(doc['author']['birth']),
         death_date=str(doc['author']['death']),
-        corpus=corpus,
+        corpus=corp,
         period=getPeriod(periods,doc['era'])) for doc in documents]
+    documentsToCreate = dict((document.name,document) for document in documentsToCreateb).values()
+    if len(documentsToCreate) != len(documentsToCreateb):
+        print("WARNING FILL DOCUMENTS: REDUNDANT DOCUMENTS, WITH REDUNDANCY: ",len(documentsToCreateb),
+              "WITHOUT REDUNDANCY: ", len(documentsToCreate))
     # for document in documentsToCreate:
     #     try:
     #         document.save()

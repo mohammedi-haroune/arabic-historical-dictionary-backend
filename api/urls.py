@@ -29,6 +29,7 @@ urlpatterns = [
     path('delete/appears', historicalDict.emptyAppears, name='delete_word_appears'),
     path('delete/wordAppears', historicalDict.emptyWordAppears, name='delete_appears'),
     path('delete/documents', fill_documents.emptyDocuments, name='delete_documents'),
+    path('delete/corpus', fill_documents.emptyCorpus, name='delete_corpus'),
     path('fill/periods', fill_models.addPeriods, name='periods'),
     path('fill/historicDict', historicalDict.fillHistoricDict, name='historicDict'),
     path('fill/wordAppears', historicalDict.fillWordAppears, name='wordAppears'),

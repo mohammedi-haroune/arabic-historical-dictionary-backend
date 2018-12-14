@@ -34,15 +34,19 @@ def export_dict_Xml(request):
     entries = Entry.objects.all()
     entries = dict((entry.pk, entry) for entry in entries)
     ents = ET.SubElement(root, 'entries')
-
+    means = []
+    app = []
     for appears in apps:
         meaning = appears.meaning
         entry = entries[meaning.entry_id]
-
         if entry.term != prev:
-            entry_tag = ET.SubElement(ents,'entry',term=entry.term)
-            prev = entry.term
-
+            if prev is not None:
+                entry_tag = ET.SubElement(ents, 'entry', term=entry.term)
+                prev = entry.term
+                for m in means:
+                    ET.SubElement(entry_tag, 'm', postag=meaning.posTag).text = m.text
+                for a in app:
+                    ET.SubElement(entry_tag, 'a')
 
             # print(str(len(sentences)))
 
