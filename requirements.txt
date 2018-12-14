@@ -36,4 +36,4 @@ wptools==0.4.17
 psycopg2==2.7.6.1
 psycopg2-binary==2.7.6.1
 pytz==2018.7
-
+eventlet==0.24.1
