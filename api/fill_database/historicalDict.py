@@ -211,13 +211,8 @@ def getWordAppears(request):
     docs = [corpus.getFileIdFromId(value['file_id']) for w,value in apps]
     return JsonResponse(docs,safe=False)
 
-def fillWordAppears(request):
-    batch = 50000
-    if request and request.method == 'GET':
-        get = request.GET
-        if 'batch' in get:
-            batch = get['batch'][0]
-    emptyWordAppears(request)
+def fillWordApps(batch=50000,lemma=False):
+    emptyWordAppears(None)
     print("INFO FILL WORD APPEARS: LOADING ENTRIES...")
     entries = Entry.objects.all()
     entries = dict((entry.term, entry) for entry in entries)
@@ -225,13 +220,12 @@ def fillWordAppears(request):
     documents = Document.objects.all()
     documents = dict((document.fileid, document) for document in documents)
     entrieset = entries.keys()
-    apps = corpus.word_apparitions_gen(entrieset, get_sentences=True)
-
+    apps = corpus.word_apparitions_gen(entrieset, get_sentences=True,lemma=lemma)
 
     appears = []
     count = 0
     print("INFO FILL WORD APPEARS: STARTS FILLING...")
-    for w,value in apps:
+    for w, value in apps:
         entry = entries[w]
         fileid = corpus.getFileIdFromId(value['file_id'])
 
@@ -267,6 +261,15 @@ def fillWordAppears(request):
         print('INFO FILL WORD APPEARS: WORDAPPEAR CREATED BULK')
     return JsonResponse(['done'], safe=False)
 
+def fillWordAppears(request):
+    batch = 50000
+    lemma = True
+    if request and request.method == 'GET':
+        get = request.GET
+        if 'batch' in get:
+            batch = get['batch'][0]
+    fillWordApps(batch,lemma)
+
 
 def fillHistoricDict(request):
     emptyAppears(request=request)
@@ -285,7 +288,7 @@ def genWordAppears(batch=50000):
         for appear in paginator.get_page(p):
             yield appear
 
-def fillHistoric():
+def fillHistoric(batch=50000):
 
     # entries = json.loads(open("api/fill_database/dicts/wassit.json").read())
     print("INFO FILL HISTORIC DICT: LOADING DOCUMENTS...")
@@ -322,6 +325,10 @@ def fillHistoric():
         ))
         count += 1
         print('INFO FILL HISTORIC DICT: APPEAR APPENDED ', count)
+        if len(appears) > batch:
+            Appears.objects.bulk_create(appears)
+            appears = []
+            print('INFO FILL HISTORIC DICT: APPEAR CREATED BULK')
 
     if len(appears):
         Appears.objects.bulk_create(appears)
