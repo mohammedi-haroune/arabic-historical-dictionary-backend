@@ -193,9 +193,27 @@ def emptyWordAppears(request):
     WordAppear.objects.all().delete()
     return JsonResponse(['done'], safe=False)
 
+def getWordAppears(request):
+    print(request.GET)
+    limit = 5
+    if request and request.method == 'GET':
+        get = request.GET
+        if 't' not in get:
+            return JsonResponse([],safe=False)
+        if 'limit' in get:
+            limit = get['limit']
+    else:
+        return JsonResponse([],safe=False)
+
+    word = get['t']
+    print("INFO WORD APPARITION: LOADING APPARITIONS FOR ", word)
+    apps = corpus.word_apparitions_gen({word}, lemma=False, limit=limit)
+    docs = [corpus.getFileIdFromId(value['file_id']) for w,value in apps]
+    return JsonResponse(docs,safe=False)
+
 def fillWordAppears(request):
-    batch = 10000
-    if request.method == 'GET':
+    batch = 50000
+    if request and request.method == 'GET':
         get = request.GET
         if 'batch' in get:
             batch = get['batch'][0]
@@ -260,7 +278,7 @@ def fillHistoricDict(request):
 
     return fillHistoric()
 
-def genWordAppears(batch=10000):
+def genWordAppears(batch=50000):
     paginator = Paginator(WordAppear.objects.all(),batch)
     for p in paginator.page_range:
         print("INFO: LOADING APPEARS PAGE ",p)

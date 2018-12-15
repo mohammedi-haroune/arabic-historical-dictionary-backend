@@ -1,5 +1,8 @@
 import os
 import inspect
+
+from pyarabic import araby
+
 try: from xml.etree import cElementTree as ElementTree
 except ImportError: from xml.etree import ElementTree
 
@@ -242,7 +245,8 @@ class HistoricalCorpus(XMLCorpusReader):
         return self._fileidsByIds[id]
 
     def word_apparitions_gen(self,dictionarySet,fileid=None,era=None,
-                          category=None,stop_words=None,get_sentences=False,context_size=5):
+                          category=None,stop_words=None,get_sentences=False,context_size=5,
+                             lemma=True, limit=-1):
         if stop_words is None:
             root = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
             stop_words = root+'/stop_words'
@@ -252,33 +256,39 @@ class HistoricalCorpus(XMLCorpusReader):
         if fileid:
             fileids = [fileid]
         for fileid in fileids:
-            print('INFO APPAREATIONS: FINDING FOR FILEID ',fileid)
             id = self._idsByfileIds[fileid]
             sentences = self._genSents([fileid])
             i = 0
             for sentence in sentences:
-                lsentence = self.farasa().lemmatize(" ".join(sentence))
+                if lemma:
+                    lsentence = self.farasa().lemmatize(" ".join(sentence))
+                else:
+                    lsentence = araby.strip_tashkeel(" ".join(sentence)).split()
                 pos = 0
                 for word in lsentence:
                     pos += 1
                     if stop_words and word in stop_words:
                         continue
                     if word in dictionarySet:
-
                         if get_sentences:
                             low = max([0, pos - context_size])
-                            high = min([len(sentence) - 1, pos + context_size])
+                            high = min([len(sentence), pos + context_size])
                             out_sentence = sentence[low:high]
                             yield word,{"file_id": id, "sentence_pos": i,
                                     "word_pos": pos,'sentence':" ".join(out_sentence)}
                         else:
                             yield word,{"file_id": id, "sentence_pos": i,"word_pos": pos}
+                        limit -= 1
+                        if not limit:
+                            return
                 i += 1
     def words_apparitions(self,dictionarySet,fileid=None,era=None,
-                          category=None,stop_words=None,get_sentences=False,context_size=5):
+                          category=None,stop_words=None,get_sentences=False,context_size=5,
+                          lemma=True,limit=-1):
         apparitions = {}
         for w,info in self.word_apparitions_gen(dictionarySet,fileid,era,category,
-                                                stop_words,get_sentences,context_size):
+                                                stop_words,get_sentences,context_size,
+                                                lemma,limit):
             if w in apparitions:
                 apparitions[w].append(info)
             else:
