@@ -16,7 +16,9 @@ class Entry(models.Model):
     class Meta:
         ordering = ('term',)
         unique_together = ('term', 'dictionary')
-
+        indexes = [
+            models.Index(fields=['term'])
+        ]
 
 class Meaning(models.Model):
     text = models.TextField()
@@ -27,6 +29,9 @@ class Meaning(models.Model):
         return self.text
     class Meta:
         ordering = ('entry',)
+        indexes = [
+            models.Index(fields=['entry'])
+        ]
         # order_with_respect_to = 'posTag'
         # unique_together = ('posTag', 'entry')
 
@@ -77,6 +82,7 @@ class Document(models.Model):
     def __str__(self):
         return self.name
 
+
     # class Meta:
     #     order_with_respect_to = 'period'
 
@@ -90,7 +96,10 @@ class Appears(models.Model):
     def __str__(self):
         return self.meaning.entry.term + ": " + self.sentence
 
-    # class Meta:
+    class Meta:
+        indexes = [
+            models.Index(fields=['meaning'])
+        ]
     #     unique_together = ('position', 'word_position', 'document')
     #     order_with_respect_to = 'sentence'
 
@@ -102,3 +111,8 @@ class WordAppear(models.Model):
     entry = models.ForeignKey(Entry,on_delete=models.CASCADE)
     def __str__(self):
         return self.entry.term + ": " + self.sentence
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['entry'])
+        ]

@@ -4,6 +4,7 @@ import os
 import random
 from json.decoder import WHITESPACE
 
+import django
 from django.core.paginator import Paginator
 from django.db import connection
 
@@ -95,8 +96,10 @@ def genAppears(batch=50000):
     paginator = Paginator(Appears.objects.select_related().all()
                           .order_by('meaning__entry'),batch)
     for p in paginator.page_range:
+
         print("INFO: LOADING APPEARS PAGE ",p)
         for appear in paginator.get_page(p):
+
             yield appear
 
 def getWordStatistics(request):
@@ -104,15 +107,17 @@ def getWordStatistics(request):
     get = {}
     if request.method == 'GET':
         get = request.GET
-        if 'term' not in get:
-            return {}
+        if 'id' not in get:
+            return JsonResponse({}, safe=False)
     elif request.method == 'POST':
         get = request.POST
-        if 'term' not in get:
-            return {}
-    word = get['term']
+        if 'id' not in get:
+            return JsonResponse({}, safe=False)
+    word = get['id']
     print("INFO GET STATISTICS: GETTING WORD'S MEANINGS APPEARS...", word)
-    apps = Appears.objects.select_related().filter(meaning__entry__term=word)
+    apps = Appears.objects.select_related().filter(meaning__entry__id=word)
+    if not apps:
+        return JsonResponse({},safe=False)
     print("INFO GET STATISTICS: LOADING PERIODS...")
     periods = Period.objects.all()
     periods = dict((period.pk, period) for period in periods)
@@ -170,6 +175,7 @@ def getGlobalStatistics(refresh=False):
         'doc_stats': doc_stats,
         'appears_stats': stats
     }
+    print(django.db.connection.queries)
     with open(file, 'w') as fp:
         json.dump(global_stats, fp)
     print('INFO GET STATISTICS: FINISHED REFRESHING')
@@ -207,7 +213,7 @@ def getWordAppears(request):
 
     word = get['t']
     print("INFO WORD APPARITION: LOADING APPARITIONS FOR ", word)
-    apps = corpus.word_apparitions_gen({word}, lemma=False, limit=limit)
+    apps = corpus.word_apparitions_gen({word}, lemma=False, limitByFile=limit)
     docs = [corpus.getFileIdFromId(value['file_id']) for w,value in apps]
     return JsonResponse(docs,safe=False)
 
@@ -220,7 +226,8 @@ def fillWordApps(batch=50000,lemma=False):
     documents = Document.objects.all()
     documents = dict((document.fileid, document) for document in documents)
     entrieset = entries.keys()
-    apps = corpus.word_apparitions_gen(entrieset, get_sentences=True,lemma=lemma)
+    apps = corpus.word_apparitions_gen(entrieset, get_sentences=True,lemma=lemma,
+                                       limit=1)
 
     appears = []
     count = 0
@@ -244,7 +251,8 @@ def fillWordApps(batch=50000,lemma=False):
             ))
 
             count += 1
-            print('INFO FILL WORD APPEARS: APPEAR APPENDED', count)
+            if count % 100 == 0:
+                print('INFO FILL WORD APPEARS: APPEAR APPENDED', count)
         except Exception as e:
             print("ERROR FILL WORD APPEARS: ENTRY WITHOUT MEANING", entry, e)
             print(document, entry)
@@ -268,7 +276,7 @@ def fillWordAppears(request):
         get = request.GET
         if 'batch' in get:
             batch = get['batch'][0]
-    fillWordApps(batch,lemma)
+    return fillWordApps(batch,lemma)
 
 
 def fillHistoricDict(request):

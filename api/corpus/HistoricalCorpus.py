@@ -246,16 +246,18 @@ class HistoricalCorpus(XMLCorpusReader):
 
     def word_apparitions_gen(self,dictionarySet,fileid=None,era=None,
                           category=None,stop_words=None,get_sentences=False,context_size=5,
-                             lemma=True, limit=-1):
+                             lemma=True, limit=-1, limitByFile=-1):
         if stop_words is None:
             root = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
             stop_words = root+'/stop_words'
             stop_words = open(stop_words,'r').readlines()
             stop_words = set(stop_word[:-1] for stop_word in stop_words)
         fileids = self.fileids(era, category)
+        limits = dict((word, limit) for word in dictionarySet)
         if fileid:
             fileids = [fileid]
         for fileid in fileids:
+            limitsbf = dict((word, limitByFile) for word in dictionarySet)
             id = self._idsByfileIds[fileid]
             sentences = self._genSents([fileid])
             i = 0
@@ -269,30 +271,47 @@ class HistoricalCorpus(XMLCorpusReader):
                     pos += 1
                     if stop_words and word in stop_words:
                         continue
-                    if word in dictionarySet:
-                        if get_sentences:
-                            low = max([0, pos - context_size])
-                            high = min([len(sentence), pos + context_size])
-                            out_sentence = sentence[low:high]
-                            yield word,{"file_id": id, "sentence_pos": i,
-                                    "word_pos": pos,'sentence':" ".join(out_sentence)}
-                        else:
-                            yield word,{"file_id": id, "sentence_pos": i,"word_pos": pos}
-                        limit -= 1
-                        if not limit:
+                    if word not in limitsbf:
+                        continue
+                    if word not in limits:
+                        continue
+                    if get_sentences:
+                        low = max([0, pos - context_size])
+                        high = min([len(sentence), pos + context_size])
+                        out_sentence = sentence[low:high]
+                        yield word, {"file_id": id, "sentence_pos": i,
+                                     "word_pos": pos, 'sentence': " ".join(out_sentence)}
+                    else:
+                        yield word, {"file_id": id, "sentence_pos": i, "word_pos": pos}
+                    limits[word] -= 1
+                    if not limits[word]:
+                        del limits[word]
+                        if not len(limits):
                             return
+                    limitsbf[word] -= 1
+                    if not limitsbf[word]:
+                        del limitsbf[word]
+
                 i += 1
     def words_apparitions(self,dictionarySet,fileid=None,era=None,
                           category=None,stop_words=None,get_sentences=False,context_size=5,
-                          lemma=True,limit=-1):
+                          lemma=True,limit=-1,limitByFile=-1):
         apparitions = {}
-        for w,info in self.word_apparitions_gen(dictionarySet,fileid,era,category,
-                                                stop_words,get_sentences,context_size,
-                                                lemma,limit):
-            if w in apparitions:
-                apparitions[w].append(info)
-            else:
-                apparitions[w] = [info]
+        eras = self.eras()
+        categories = self.categories()
+        if era:
+            eras = [era]
+        if category:
+            categories = [category]
+        for era in eras:
+            for category in categories:
+                for w, info in self.word_apparitions_gen(dictionarySet, fileid, era, category,
+                                                         stop_words, get_sentences, context_size,
+                                                         lemma, limit,limitByFile):
+                    if w in apparitions:
+                        apparitions[w].append(info)
+                    else:
+                        apparitions[w] = [info]
         apparitions = dict((w,apparitions[w]) for w in apparitions if len(apparitions[w]))
         return apparitions
 

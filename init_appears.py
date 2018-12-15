@@ -1,5 +1,5 @@
-import api.fill_database.historicalDict as hd
+from api.fill_database.historicalDict import fillWordApps
+
 
 if __name__ == '__main__':
-    hd.fillWordAppears(None)
-    hd.fillHistoric()
+    fillWordApps()
