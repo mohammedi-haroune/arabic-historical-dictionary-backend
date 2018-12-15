@@ -201,7 +201,7 @@ def getWordAppears(request):
         if 't' not in get:
             return JsonResponse([],safe=False)
         if 'limit' in get:
-            limit = get['limit']
+            limit = int(get['limit'])
     else:
         return JsonResponse([],safe=False)
 
