@@ -93,6 +93,7 @@ class HistoricalCorpus(XMLCorpusReader):
         self._fileidsByIds = {}
         self._idsByfileIds = {}
         self._far = None
+        self.countFiles = 0
         for fileid in self.fileids():
             metadata = self.metadata(fileid)
             t = metadata['type']
@@ -257,6 +258,10 @@ class HistoricalCorpus(XMLCorpusReader):
         if fileid:
             fileids = [fileid]
         for fileid in fileids:
+            print('INFO GET APPEARS HISDICT: DOING FILE: ',fileid)
+            self.countFiles += 1
+            print('INFO GET APPEARS HISDICT: COUND FILES ',self.countFiles,
+                  ' OUT OF ', len(self.fileids()))
             limitsbf = dict((word, limitByFile) for word in dictionarySet)
             id = self._idsByfileIds[fileid]
             sentences = self._genSents([fileid])
@@ -291,8 +296,9 @@ class HistoricalCorpus(XMLCorpusReader):
                     limitsbf[word] -= 1
                     if not limitsbf[word]:
                         del limitsbf[word]
-
                 i += 1
+
+
     def words_apparitions(self,dictionarySet,fileid=None,era=None,
                           category=None,stop_words=None,get_sentences=False,context_size=5,
                           lemma=True,limit=-1,limitByFile=-1):
@@ -303,6 +309,7 @@ class HistoricalCorpus(XMLCorpusReader):
             eras = [era]
         if category:
             categories = [category]
+        self.countFiles = 0
         for era in eras:
             for category in categories:
                 for w, info in self.word_apparitions_gen(dictionarySet, fileid, era, category,

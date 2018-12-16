@@ -251,7 +251,7 @@ def fillWordApps(batch=50000,lemma=False):
             ))
 
             count += 1
-            if count % 100 == 0:
+            if count % 10000 == 0:
                 print('INFO FILL WORD APPEARS: APPEAR APPENDED', count)
         except Exception as e:
             print("ERROR FILL WORD APPEARS: ENTRY WITHOUT MEANING", entry, e)
