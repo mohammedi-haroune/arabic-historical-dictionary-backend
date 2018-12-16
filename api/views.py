@@ -21,6 +21,17 @@ class EntryViewSet(viewsets.ModelViewSet):
     queryset = Entry.objects.all()
     serializer_class = EntrySerializer
 
+    def get_queryset(self):
+        """
+        Optionally restricts the returned purchases to a given user,
+        by filtering against a `username` query parameter in the URL.
+        """
+        queryset = Entry.objects.all()
+        query = self.request.query_params.get('query', '')
+        if query:
+            queryset = queryset.filter(term__contains=query)
+        return queryset
+
 
 class MeaningViewSet(viewsets.ModelViewSet):
     queryset = Meaning.objects.all()
@@ -49,7 +60,6 @@ class DocumentViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(name__contains=query)
         if categories:
             queryset = queryset.filter(category__in=categories)
-
         if periods:
             queryset = queryset.filter(period_id__in=periods)
         return queryset
