@@ -92,7 +92,7 @@ def export_dict_Xml(request):
     tree.write(filepath)
     return JsonResponse(['done'],safe=False)
 
-def genAppears(batch=50000):
+def genAppears(batch=10000):
     paginator = Paginator(Appears.objects.select_related().all()
                           .order_by('meaning__entry'),batch)
     for p in paginator.page_range:
@@ -217,7 +217,7 @@ def getWordAppears(request):
     docs = [corpus.getFileIdFromId(value['file_id']) for w,value in apps]
     return JsonResponse(docs,safe=False)
 
-def fillWordApps(batch=50000,lemma=False):
+def fillWordApps(batch=10000,lemma=False):
     emptyWordAppears(None)
     print("INFO FILL WORD APPEARS: LOADING ENTRIES...")
     entries = Entry.objects.all()
@@ -270,7 +270,7 @@ def fillWordApps(batch=50000,lemma=False):
     return JsonResponse(['done'], safe=False)
 
 def fillWordAppears(request):
-    batch = 50000
+    batch = 10000
     lemma = True
     if request and request.method == 'GET':
         get = request.GET
@@ -289,14 +289,14 @@ def fillHistoricDict(request):
 
     return fillHistoric()
 
-def genWordAppears(batch=50000):
+def genWordAppears(batch=10000):
     paginator = Paginator(WordAppear.objects.all(),batch)
     for p in paginator.page_range:
         print("INFO: LOADING APPEARS PAGE ",p)
         for appear in paginator.get_page(p):
             yield appear
 
-def fillHistoric(batch=50000):
+def fillHistoric(batch=10000):
 
     # entries = json.loads(open("api/fill_database/dicts/wassit.json").read())
     print("INFO FILL HISTORIC DICT: LOADING DOCUMENTS...")

@@ -254,7 +254,8 @@ class HistoricalCorpus(XMLCorpusReader):
             stop_words = open(stop_words,'r').readlines()
             stop_words = set(stop_word[:-1] for stop_word in stop_words)
         fileids = self.fileids(era, category)
-        limits = dict((word, limit) for word in dictionarySet)
+
+        limits = dict((word, limit) for word in dictionarySet if word not in stop_words)
         if fileid:
             fileids = [fileid]
         for fileid in fileids:
@@ -262,7 +263,7 @@ class HistoricalCorpus(XMLCorpusReader):
             self.countFiles += 1
             print('INFO GET APPEARS HISDICT: COUND FILES ',self.countFiles,
                   ' OUT OF ', len(self.fileids()))
-            limitsbf = dict((word, limitByFile) for word in dictionarySet)
+            limitsbf = dict((word, limitByFile) for word in dictionarySet if word not in stop_words)
             id = self._idsByfileIds[fileid]
             sentences = self._genSents([fileid])
             i = 0
@@ -274,8 +275,7 @@ class HistoricalCorpus(XMLCorpusReader):
                 pos = 0
                 for word in lsentence:
                     pos += 1
-                    if stop_words and word in stop_words:
-                        continue
+
                     if word not in limitsbf:
                         continue
                     if word not in limits:
