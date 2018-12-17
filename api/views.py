@@ -2,10 +2,9 @@ from rest_framework import viewsets, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.models import Dictionary, Entry, Meaning, Period, Document
+from api.models import Dictionary, Entry, Meaning, Period, Document, Appears
 from api.serializers import DictionarySerializer, EntrySerializer, MeaningSerializer, PeriodSerializer, \
-    DocumentSerializer
-
+    DocumentSerializer, AppearsSerializer, MeaningAppearsSerializer
 
 from api.corpus.initializer import corpus
 # Create your views here.
@@ -63,6 +62,14 @@ class DocumentViewSet(viewsets.ModelViewSet):
         if periods:
             queryset = queryset.filter(period_id__in=periods)
         return queryset
+
+class AppearsViewSet(viewsets.ModelViewSet):
+    queryset = Appears.objects.all()
+    serializer_class = AppearsSerializer
+
+class MeaningApperasViewSet(viewsets.ModelViewSet):
+    queryset = Meaning.objects.all()
+    serializer_class = MeaningAppearsSerializer
 
 
 class CategoryList(APIView):
