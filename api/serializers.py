@@ -5,9 +5,33 @@ from api.corpus.initializer import corpus
 
 # Serializers define the API representation.
 class MeaningSerializer(serializers.ModelSerializer):
+    is_appears = serializers.SerializerMethodField()
+
+    def get_is_appears(self, obj):
+        return obj.appears_set.count() > 0
+
     class Meta:
         model = Meaning
-        fields = ['posTag', 'text']
+        fields = ['id', 'posTag', 'text', 'is_appears']
+
+
+class AppearsSerializer(serializers.ModelSerializer):
+    period_id = serializers.SerializerMethodField()
+
+    def get_period_id(self, obj):
+        return obj.document.period.id
+
+    class Meta:
+        model = Appears
+        fields = ['sentence', 'period_id']
+
+
+class MeaningAppearsSerializer(serializers.ModelSerializer):
+    appears_set = AppearsSerializer(many=True)
+
+    class Meta:
+        model = Meaning
+        fields = ['id', 'appears_set']
 
 
 class EntrySerializer(serializers.ModelSerializer):
