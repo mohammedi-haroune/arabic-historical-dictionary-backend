@@ -2,9 +2,9 @@ from rest_framework import viewsets, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.models import Dictionary, Entry, Meaning, Period, Document, Appears
+from api.models import Dictionary, Entry, Meaning, Period, Document, Appears, WordAppear
 from api.serializers import DictionarySerializer, EntrySerializer, MeaningSerializer, PeriodSerializer, \
-    DocumentSerializer, AppearsSerializer, MeaningAppearsSerializer
+    DocumentSerializer, AppearsSerializer, MeaningAppearsSerializer, WordAppearsSerializer
 
 from api.corpus.initializer import corpus
 # Create your views here.
@@ -41,6 +41,21 @@ class PeriodViewSet(viewsets.ModelViewSet):
     queryset = Period.objects.all()
     serializer_class = PeriodSerializer
 
+
+class WordAppearsViewSet(viewsets.ModelViewSet):
+    queryset = WordAppear.objects.all()
+    serializer_class =  WordAppearsSerializer
+
+    def get_queryset(self):
+        query_set = WordAppear.objects.all()
+        query = self.request.query_params.get('query', '')
+        term_id = self.request.query_params.get('term_id', '')
+        if query:
+            query_set = query_set.filter(entry__term__contains=query)
+        if term_id:
+            query_set = query_set.filter(entry_id=term_id)
+
+        return query_set
 
 class DocumentViewSet(viewsets.ModelViewSet):
     serializer_class = DocumentSerializer
