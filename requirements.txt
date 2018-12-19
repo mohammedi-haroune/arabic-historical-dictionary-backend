@@ -7,11 +7,13 @@ decorator==4.3.0
 Django==2.1.2
 django-cors-headers==2.4.0
 djangorestframework==3.9.0
+gunicorn==19.9.0
 html2text==2018.1.9
 idna==2.7
 ipython==7.2.0
 ipython-genutils==0.2.0
 jedi==0.13.1
+JPype1==0.6.3
 lxml==4.2.5
 nltk==3.4
 parso==0.3.1
@@ -31,3 +33,7 @@ traitlets==4.3.2
 urllib3==1.24.1
 wcwidth==0.1.7
 wptools==0.4.17
+psycopg2==2.7.6.1
+psycopg2-binary==2.7.6.1
+pytz==2018.7
+eventlet==0.24.1

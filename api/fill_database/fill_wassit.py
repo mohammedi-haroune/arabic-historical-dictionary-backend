@@ -1,14 +1,17 @@
 import json
 
 from django.http import HttpResponse, JsonResponse
-
-from api.models import Dictionary, Meaning, Entry
-
+#
+try:
+    from api.models import Dictionary, Meaning, Entry
+except Exception:
+    pass
 
 def addWassit(request):
-    dictionary = Dictionary.objects.filter(name='el_wassit')
+
+    dictionary = Dictionary.objects.filter(name='المعجم الوسيط')
     if not dictionary:
-        dictionary = Dictionary(name='el_wassit')
+        dictionary = Dictionary(name='المعجم الوسيط')
         dictionary.save()
     else:
         dictionary = dictionary[0]
@@ -31,12 +34,12 @@ def addWassit(request):
     return HttpResponse("done!")
 
 def entries(request):
-    dictionary = Dictionary.objects.filter(name='el_wassit')[0]
+    dictionary = Dictionary.objects.filter(name='المعجم الوسيط')[0]
     entryMap = {}
     for element in dictionary.entry_set.all()[:100]:
         meanings = [meaning.text for meaning in element.meaning_set.all()]
         entryMap[element.term] = meanings
-    # Entry.objects.all().delete()
+    Entry.objects.all().delete()
     return JsonResponse(entryMap, safe=False)
 
 

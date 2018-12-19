@@ -1,14 +1,12 @@
-from rest_framework import viewsets, serializers, generics, mixins
-from rest_framework.decorators import api_view
+from rest_framework import viewsets, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.corpus import HistoricalCorpus
-from api.models import Dictionary, Entry, Meaning, Period, Document
+from api.models import Dictionary, Entry, Meaning, Period, Document, Appears, WordAppear
 from api.serializers import DictionarySerializer, EntrySerializer, MeaningSerializer, PeriodSerializer, \
-    DocumentSerializer
-from pathlib import Path
-from api.corpus import corpus
+    DocumentSerializer, AppearsSerializer, MeaningAppearsSerializer, WordAppearsSerializer
+
+from api.corpus.initializer import corpus
 # Create your views here.
 
 
@@ -22,6 +20,17 @@ class EntryViewSet(viewsets.ModelViewSet):
     queryset = Entry.objects.all()
     serializer_class = EntrySerializer
 
+    def get_queryset(self):
+        """
+        Optionally restricts the returned purchases to a given user,
+        by filtering against a `username` query parameter in the URL.
+        """
+        queryset = Entry.objects.all()
+        query = self.request.query_params.get('query', '')
+        if query:
+            queryset = queryset.filter(term__contains=query)
+        return queryset
+
 
 class MeaningViewSet(viewsets.ModelViewSet):
     queryset = Meaning.objects.all()
@@ -32,6 +41,21 @@ class PeriodViewSet(viewsets.ModelViewSet):
     queryset = Period.objects.all()
     serializer_class = PeriodSerializer
 
+
+class WordAppearsViewSet(viewsets.ModelViewSet):
+    queryset = WordAppear.objects.all()
+    serializer_class =  WordAppearsSerializer
+
+    def get_queryset(self):
+        query_set = WordAppear.objects.all()
+        query = self.request.query_params.get('query', '')
+        term_id = self.request.query_params.get('term_id', '')
+        if query:
+            query_set = query_set.filter(entry__term__contains=query)
+        if term_id:
+            query_set = query_set.filter(entry_id=term_id)
+
+        return query_set
 
 class DocumentViewSet(viewsets.ModelViewSet):
     serializer_class = DocumentSerializer
@@ -50,10 +74,17 @@ class DocumentViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(name__contains=query)
         if categories:
             queryset = queryset.filter(category__in=categories)
-
         if periods:
             queryset = queryset.filter(period_id__in=periods)
         return queryset
+
+class AppearsViewSet(viewsets.ModelViewSet):
+    queryset = Appears.objects.all()
+    serializer_class = AppearsSerializer
+
+class MeaningApperasViewSet(viewsets.ModelViewSet):
+    queryset = Meaning.objects.all()
+    serializer_class = MeaningAppearsSerializer
 
 
 class CategoryList(APIView):
