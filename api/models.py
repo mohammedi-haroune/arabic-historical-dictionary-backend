@@ -12,7 +12,7 @@ class Entry(models.Model):
     term = models.CharField(max_length=255)
     dictionary = models.ForeignKey(Dictionary, on_delete=models.CASCADE)
     def __str__(self):
-        return self.term
+        return self.term + ' in ' + self.dictionary.name
     class Meta:
         ordering = ('term',)
         unique_together = ('term', 'dictionary')
@@ -89,7 +89,7 @@ class Document(models.Model):
 class Appears(models.Model):
     sentence = models.TextField()
     confirmed = models.BooleanField(default=False)
-    position = models.BigIntegerField() # sentence in which the word exists
+    position = models.BigIntegerField(default=-1) # sentence in which the word exists
     word_position = models.BigIntegerField(default=-1) #position in sentence
     document = models.ForeignKey(Document,on_delete=models.CASCADE)
     meaning = models.ForeignKey(Meaning,on_delete=models.CASCADE)
@@ -100,7 +100,7 @@ class Appears(models.Model):
         indexes = [
             models.Index(fields=['meaning'])
         ]
-    #     unique_together = ('position', 'word_position', 'document')
+        unique_together = ('position', 'word_position', 'document')
     #     order_with_respect_to = 'sentence'
 
 class WordAppear(models.Model):
@@ -116,3 +116,4 @@ class WordAppear(models.Model):
         indexes = [
             models.Index(fields=['entry'])
         ]
+        unique_together = ('position', 'word_position', 'document')
