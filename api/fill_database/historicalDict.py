@@ -45,19 +45,19 @@ def export_dict_Xml(request):
         print("INFO EXPORT XML: NEW APPEAR", entry.term, prev)
         if entry.term != prev:
             if prev is not None:
-                entry_tag = ET.SubElement(ents, 'entry', term=entry.term)
+                entry_tag = ET.SubElement(ents, 'entry', term=prev)
                 means_tag = ET.SubElement(entry_tag, 'meanings')
                 for i,m in sorted(means.values(),key=lambda x:x[0]):
                     ET.SubElement(means_tag, 'm', postag=m.posTag, id=str(i)).text = m.text
                 exam_tag = ET.SubElement(entry_tag, 'examples')
                 for a in app:
-                    appears = a['appears']
+                    appears2 = a['appears']
                     atag = ET.SubElement(exam_tag, 'a', meaning_id=str(a['m']),
-                                         sentence=str(appears.position),
-                                 word_pos=str(appears.word_position))
-                    ET.SubElement(atag,'doc').text = appears.document.fileid
-                    ET.SubElement(atag,'sample_text').text = appears.sentence
-                    ET.SubElement(atag,'confirmed').text = str(appears.confirmed)
+                                         sentence=str(appears2.position),
+                                 word_pos=str(appears2.word_position))
+                    ET.SubElement(atag,'doc').text = appears2.document.fileid
+                    ET.SubElement(atag,'sample_text').text = appears2.sentence
+                    ET.SubElement(atag,'confirmed').text = str(appears2.confirmed)
                 count += 1
                 print("INFO EXPORT XML: ADDED ENTRY", count)
             means = {}
