@@ -9,7 +9,7 @@ from django.conf.urls import url, include
 from django.contrib.auth.models import User
 from rest_framework import routers
 from api.views import DictionaryViewSet, EntryViewSet, MeaningViewSet, PeriodViewSet, CategoryList, DocumentViewSet, \
-    PostagList, SentenceList, SentenceViewSet, AppearsViewSet, MeaningApperasViewSet
+    PostagList, SentenceList, SentenceViewSet, AppearsViewSet, MeaningApperasViewSet, WordAppearsViewSet
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
@@ -20,6 +20,7 @@ router.register(r'periods', PeriodViewSet)
 router.register(r'documents', DocumentViewSet)
 router.register(r'appears', AppearsViewSet)
 router.register(r'meaning_appears', MeaningApperasViewSet)
+router.register(r'word_appears', WordAppearsViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
