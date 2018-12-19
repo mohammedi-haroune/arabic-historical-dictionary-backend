@@ -2,13 +2,14 @@ from django.urls import path
 
 from api.fill_database import fill_wassit, fill_models, fill_documents, historicalDict, fill_dicos
 from api.fill_database import fill_maany
+from api.serializers import MeaningAppearsSerializer
 from . import process
 
 from django.conf.urls import url, include
 from django.contrib.auth.models import User
 from rest_framework import routers
 from api.views import DictionaryViewSet, EntryViewSet, MeaningViewSet, PeriodViewSet, CategoryList, DocumentViewSet, \
-    PostagList, SentenceList, SentenceViewSet
+    PostagList, SentenceList, SentenceViewSet, AppearsViewSet, MeaningApperasViewSet, WordAppearsViewSet
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
@@ -17,6 +18,9 @@ router.register(r'entries', EntryViewSet)
 router.register(r'meanings', MeaningViewSet)
 router.register(r'periods', PeriodViewSet)
 router.register(r'documents', DocumentViewSet)
+router.register(r'appears', AppearsViewSet)
+router.register(r'meaning_appears', MeaningApperasViewSet)
+router.register(r'word_appears', WordAppearsViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
