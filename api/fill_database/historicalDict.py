@@ -107,15 +107,25 @@ def getWordStatistics(request):
     get = {}
     if request.method == 'GET':
         get = request.GET
-        if 'id' not in get:
+        if 't' in get:
+            apps = Appears.objects.select_related().filter(meaning__entry__term=get['t'])
+
+        elif 'id' not in get:
+            apps = Appears.objects.select_related().filter(meaning__entry__id=get['id'])
+        else:
             return JsonResponse({}, safe=False)
     elif request.method == 'POST':
         get = request.POST
-        if 'id' not in get:
+        if 't' in get:
+            apps = Appears.objects.select_related().filter(meaning__entry__term=get['t'])
+
+        elif 'id' not in get:
+            apps = Appears.objects.select_related().filter(meaning__entry__id=get['id'])
+        else:
             return JsonResponse({}, safe=False)
-    word = get['id']
-    print("INFO GET STATISTICS: GETTING WORD'S MEANINGS APPEARS...", word)
-    apps = Appears.objects.select_related().filter(meaning__entry__id=word)
+    # word = get['id']
+    print("INFO GET STATISTICS: GETTING WORD'S MEANINGS APPEARS...")
+    # apps = Appears.objects.select_related().filter(meaning__entry__id=word)
     if not apps:
         return JsonResponse({},safe=False)
     print("INFO GET STATISTICS: LOADING PERIODS...")
