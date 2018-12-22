@@ -46,10 +46,11 @@ class Sliceable(object):
                            .format(key))
 
 class SentsIterator(object):
-    def __init__(self, corpus, fileid,size):
+    def __init__(self, corpus, fileid, size):
         self.tree_iterator = ElementTree.iterparse(corpus.abspath(fileid).open())
         self.num = 0
         self.size = size
+        metadata = corpus.metadata(fileid)
 
     def __iter__(self):
         return self
@@ -61,7 +62,12 @@ class SentsIterator(object):
         if self.num < len(self):
             event, entry = self.tree_iterator.__next__()
             if entry.tag == "sentence" and entry.text is not None:
-                return nltk.TreebankWordTokenizer().tokenize(entry.text)
+                n = {
+                    'sentence': nltk.TreebankWordTokenizer().tokenize(entry.text),
+                    'position': self.num,
+                }
+                self.num = self.num + 1
+                return n
             else:
                 return self.next()
         else:
