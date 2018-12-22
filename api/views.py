@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 
 from api.models import Dictionary, Entry, Meaning, Period, Document, Appears, WordAppear
 from api.serializers import DictionarySerializer, EntrySerializer, MeaningSerializer, PeriodSerializer, \
-    DocumentSerializer, AppearsSerializer, MeaningAppearsSerializer, WordAppearsSerializer
+    DocumentSerializer, AppearsSerializer, MeaningAppearsSerializer, WordAppearsSerializer, SentenceSerializer
 
 from api.corpus.initializer import corpus
 # Create your views here.
@@ -127,7 +127,7 @@ class SentenceList(APIView):
         return Response(corpus.sents(fileid))
 
 class SentenceViewSet(viewsets.GenericViewSet):
-    serializer_class = serializers.ListField(child=serializers.CharField())
+    serializer_class = SentenceSerializer(many=True)
 
     def get_queryset(self):
         fileid = Document.objects.get(pk=self.request.GET['id']).fileid
