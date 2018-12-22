@@ -6,14 +6,15 @@ from api.corpus.initializer import corpus
 # Serializers define the API representation.
 
 class AppearsSerializer(serializers.ModelSerializer):
-    #period_id = serializers.SerializerMethodField(required=False, allow_null=True)
+    period_id = serializers.SerializerMethodField(required=False, allow_null=True)
 
-    #def get_period_id(self, obj):
-    #    return obj.document.period.id
+    def get_period_id(self, obj):
+        return obj.document.period.id
 
     class Meta:
         model = Appears
-        fields = ['sentence', 'position', 'word_position', 'document', 'confirmed']
+        fields = ['sentence', 'position', 'word_position', 'document', 'confirmed', 'period_id']
+
 
 class MeaningSerializer(serializers.ModelSerializer):
     is_appears = serializers.SerializerMethodField(required=False, allow_null=True)
@@ -27,7 +28,6 @@ class MeaningSerializer(serializers.ModelSerializer):
         fields = ['id', 'posTag', 'text', 'appears_set', 'is_appears']
 
 
-
 class MeaningAppearsSerializer(serializers.ModelSerializer):
     appears_set = AppearsSerializer(many=True)
 
@@ -38,6 +38,7 @@ class MeaningAppearsSerializer(serializers.ModelSerializer):
 
 class EntrySerializer(serializers.ModelSerializer):
     meaning_set = MeaningSerializer(many=True, required=False, allow_null=True)
+
     class Meta:
         model = Entry
         fields = ['id', 'term', 'dictionary', 'meaning_set']
@@ -46,7 +47,6 @@ class EntrySerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # set the use created entry to the user dictionary
         print('validated_data', validated_data)
-
 
         meaning_set = validated_data.pop('meaning_set', [])
         entry, created = Entry.objects.get_or_create(**validated_data)
@@ -66,7 +66,6 @@ class EntrySerializer(serializers.ModelSerializer):
                 print('appears', dict(appears))
                 Appears.objects.create(meaning=meaning, **appears)
         return entry
-
 
 class DictionarySerializer(serializers.ModelSerializer):
     class Meta:
@@ -108,10 +107,16 @@ class DocumentSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'category', 'author', 'period']
 
 
-
 class WordAppearsSerializer(serializers.ModelSerializer):
     document = DocumentSerializer()
-    entry = EntrySerializer()
+    entry = serializers.SlugRelatedField(read_only=True, slug_field='term')
+
     class Meta:
         model = WordAppear
         fields = ['id', 'entry', 'sentence', 'document']
+
+
+class SentenceSerializer(serializers.Serializer):
+    sentence = serializers.CharField()
+    position = serializers.IntegerField()
+    document_id = serializers.IntegerField()
