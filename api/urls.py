@@ -29,7 +29,7 @@ urlpatterns = [
     path('export/xml', historicalDict.export_dict_Xml, name='entries'),
     #api/statistics to get global statistics set ?refresh=1 to refresh statistics
     path('statistics', historicalDict.getStatistics, name='stats'),
-    #api/statistics/word?term=t1 to get statistics regarding t1's meanings
+    #api/statistics/word?t=<t1> to get statistics regarding t1's meanings or id=<id1>: id1 is term's id
     path('statistics/word',historicalDict.getWordStatistics,name='word_stats'),
     path('delete/appears', historicalDict.emptyAppears, name='delete_word_appears'),
     path('delete/wordAppears', historicalDict.emptyWordAppears, name='delete_appears'),
