@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from api.models import Dictionary, Entry, Meaning, Period, Document, Appears, WordAppear
-from api.corpus.initializer import corpus
+from api.corpus.initializer import corpus, HIST_DICT_NAME
 
 
 # Serializers define the API representation.
@@ -49,7 +49,12 @@ class EntrySerializer(serializers.ModelSerializer):
         print('validated_data', validated_data)
 
         meaning_set = validated_data.pop('meaning_set', [])
-        entry, created = Entry.objects.get_or_create(**validated_data)
+        dictionary, created = Dictionary.objects.get_or_create(name=HIST_DICT_NAME)
+        print('dictionary', dictionary)
+        # pop the use suppplied dictionary, use the default (HIST_DICT_NAME) instead
+        validated_data.pop('dictionary')
+        print('validated_data after pop dictionary', validated_data)
+        entry, created = Entry.objects.get_or_create(dictionary=dictionary, **validated_data)
 
         print('term', entry)
 
