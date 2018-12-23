@@ -3,6 +3,8 @@ import inspect
 
 from pyarabic import araby
 
+from api.models import Document
+
 try: from xml.etree import cElementTree as ElementTree
 except ImportError: from xml.etree import ElementTree
 
@@ -50,7 +52,7 @@ class SentsIterator(object):
         self.tree_iterator = ElementTree.iterparse(corpus.abspath(fileid).open())
         self.num = 0
         self.size = size
-        metadata = corpus.metadata(fileid)
+        self.id = Document.objects.get(fileid=fileid).id
 
     def __iter__(self):
         return self
@@ -65,6 +67,7 @@ class SentsIterator(object):
                 n = {
                     'sentence': nltk.TreebankWordTokenizer().tokenize(entry.text),
                     'position': self.num,
+                    'document': self.id
                 }
                 self.num = self.num + 1
                 return n
