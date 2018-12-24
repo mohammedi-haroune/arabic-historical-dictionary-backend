@@ -41,7 +41,7 @@ class EntrySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Entry
-        fields = ['id', 'term', 'dictionary', 'meaning_set']
+        fields = ['id', 'term', 'meaning_set']
         validators = []
 
     def create(self, validated_data):
