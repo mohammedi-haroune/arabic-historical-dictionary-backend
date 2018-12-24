@@ -37,7 +37,7 @@ class MeaningAppearsSerializer(serializers.ModelSerializer):
 
 
 class EntrySerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField()
+    id = serializers.IntegerField(required=False)
     meaning_set = MeaningSerializer(many=True, required=False, allow_null=True)
 
     class Meta:
