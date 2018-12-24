@@ -17,6 +17,7 @@ class AppearsSerializer(serializers.ModelSerializer):
 
 
 class MeaningSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
     is_appears = serializers.SerializerMethodField(required=False, allow_null=True)
     appears_set = AppearsSerializer(many=True, allow_null=True, required=False)
 
@@ -68,9 +69,15 @@ class EntrySerializer(serializers.ModelSerializer):
             print('meaning', meaning)
             print('appears_set', appears_set)
 
-            if 'id' not in meaning:
+            meaning_id = meaning.pop('id', '')
+
+            if meaning_id:
+                print('Hey! meaning id is there !')
+                meaning = Meaning.objects.get(id=meaning_id)
+            else:
                 meaning, created = Meaning.objects.get_or_create(entry=entry, **meaning)
 
+            print('here is the meaning :', meaning.id, meaning)
             for appears in appears_set:
                 print('appears', dict(appears))
                 Appears.objects.create(meaning=meaning, **appears)
