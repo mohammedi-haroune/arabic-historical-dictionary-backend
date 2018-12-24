@@ -13,7 +13,7 @@ class AppearsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Appears
-        fields = ['sentence', 'position', 'word_position', 'document', 'confirmed', 'period_id']
+        fields = ['id', 'sentence', 'position', 'word_position', 'document', 'confirmed', 'period_id']
 
 
 class MeaningSerializer(serializers.ModelSerializer):
@@ -51,9 +51,7 @@ class EntrySerializer(serializers.ModelSerializer):
         meaning_set = validated_data.pop('meaning_set', [])
         dictionary, created = Dictionary.objects.get_or_create(name=HIST_DICT_NAME)
         print('dictionary', dictionary)
-        # pop the use suppplied dictionary, use the default (HIST_DICT_NAME) instead
-        validated_data.pop('dictionary')
-        print('validated_data after pop dictionary', validated_data)
+        # use the default (HIST_DICT_NAME) instead
         entry, created = Entry.objects.get_or_create(dictionary=dictionary, **validated_data)
 
         print('term', entry)
