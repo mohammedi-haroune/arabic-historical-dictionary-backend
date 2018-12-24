@@ -1,5 +1,6 @@
 from django.urls import path
 
+from api.corpus.search import search_end
 from api.fill_database import fill_wassit, fill_models, fill_documents, historicalDict, fill_dicos
 from api.fill_database import fill_maany
 from api.serializers import MeaningAppearsSerializer
@@ -43,6 +44,8 @@ urlpatterns = [
     path('fill/dico/wassit', fill_dicos.wassit, name='wassit'),
     path('fill/dico/alghni', fill_dicos.elghani, name='elghani'),
     path('fill/dico/alraeid', fill_dicos.elraeid, name='elraeid'),
+    path('search/filter/eraCat', search_end.filter_end_e_c, name='filterdata'),
+    path('search/filter/fileSents', search_end.filter_end_f_s, name='filterdata'),
     path('testDoc', fill_documents.testDoc, name='testDoc'),
     path('apparition/word',historicalDict.getWordAppears, name='word_appears'),
     path('categories/', CategoryList.as_view()),

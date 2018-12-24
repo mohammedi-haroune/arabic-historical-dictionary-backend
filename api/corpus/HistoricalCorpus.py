@@ -3,90 +3,18 @@ import inspect
 
 from pyarabic import araby
 
-from api.models import Document
+from api.corpus.sents_iterator import SentsIterator
 
 try: from xml.etree import cElementTree as ElementTree
 except ImportError: from xml.etree import ElementTree
 
-from itertools import islice
+
 
 import nltk
 from nltk.corpus import XMLCorpusReader
 from nltk.internals import ElementWrapper
 
 from .farassaWrapper.farassaInterface import Farasa
-
-
-class Sliceable(object):
-    """Sliceable(iterable) is an object that wraps 'iterable' and
-    generates items from 'iterable' when subscripted. For example:
-
-        >>> from itertools import count, cycle
-        >>> s = Sliceable(count())
-        >>> list(s[3:10:2])
-        [3, 5, 7, 9]
-        >>> list(s[3:6])
-        [13, 14, 15]
-        >>> next(Sliceable(cycle(range(7)))[11])
-        4
-        >>> s['string']
-        Traceback (most recent call last):
-            ...
-        KeyError: 'Key must be non-negative integer or slice, not string'
-
-    """
-    def __init__(self, iterable):
-        self.iterable = iterable
-
-    def __getitem__(self, key):
-        if isinstance(key, int) and key >= 0:
-            return islice(self.iterable, key, key + 1)
-        elif isinstance(key, slice):
-            return islice(self.iterable, key.start, key.stop, key.step)
-        else:
-            raise KeyError("Key must be non-negative integer or slice, not {}"
-                           .format(key))
-
-class SentsIterator(object):
-    def __init__(self, corpus, fileid, size):
-        self.tree_iterator = ElementTree.iterparse(corpus.abspath(fileid).open())
-        self.num = 0
-        self.size = size
-        self.id = Document.objects.get(fileid=fileid).id
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        return self.next()
-
-    def next(self):
-        if self.num < len(self):
-            event, entry = self.tree_iterator.__next__()
-            if entry.tag == "sentence" and entry.text is not None:
-                n = {
-                    'sentence': nltk.TreebankWordTokenizer().tokenize(entry.text),
-                    'position': self.num,
-                    'document': self.id
-                }
-                self.num = self.num + 1
-                return n
-            else:
-                return self.next()
-        else:
-            raise StopIteration()
-
-    def __getitem__(self, key):
-        if isinstance(key, int) and key >= 0:
-            return islice(self, key, key + 1)
-        elif isinstance(key, slice):
-            return islice(self, key.start, key.stop, key.step)
-        else:
-            raise KeyError("Key must be non-negative integer or slice, not {}"
-                           .format(key))
-
-    def __len__(self):
-        return self.size
 
 class HistoricalCorpus(XMLCorpusReader):
 
@@ -157,7 +85,7 @@ class HistoricalCorpus(XMLCorpusReader):
 
         return fileids
 
-    def _genSents(self,fileids=None,start=None,end=None,era=None,category=None):
+    def gen_sents(self,fileids=None,start=None,end=None,era=None,category=None):
         if not start:
             start = 0
         if era or category:
@@ -186,7 +114,7 @@ class HistoricalCorpus(XMLCorpusReader):
         metadata = self.metadata(fileid)
         return SentsIterator(self, fileid,metadata["size"])
 
-    def _genWords(self,fileids=None,start=None,end=None,era=None,category=None):
+    def gen_words(self,fileids=None,start=None,end=None,era=None,category=None):
         sentences = self._genSents(fileids,era=era,category=category)
         if not start:
             start = 0
@@ -232,6 +160,15 @@ class HistoricalCorpus(XMLCorpusReader):
         if not self._far:
             self._far = Farasa()
         return self._far
+
+    def gen_tagged_sents(self,fileid=None,start=None,end=None,era=None,category=None):
+        fileids = None
+        if fileid:
+            fileids = [fileid]
+        sentences = self.gen_sents(fileids,start,end,era,category)
+        for sentence in sentences:
+            yield list(self.farasa().tag(" ".join(sentence)))
+
     def tagged_sents(self,fileid=None,start=None,end=None,era=None,category=None):
         sentences = self.sents(fileid,start,end,era,category)
         return [list(self.farasa().tag(" ".join(s))) for s in sentences]
@@ -239,6 +176,14 @@ class HistoricalCorpus(XMLCorpusReader):
     def tagged_words(self, fileid=None,start=None,end=None,era=None,category=None):
         words = self.words(fileid,start,end,era,category)
         return list(self.farasa().tag(" ".join(words)))
+
+    def gen_lemma_sents(self,fileid=None,start=None,end=None,era=None,category=None):
+        fileids = None
+        if fileid:
+            fileids = [fileid]
+        sentences = self.gen_sents(fileids,start,end,era,category)
+        for sentence in sentences:
+            yield list(self.farasa().lemmatize(" ".join(sentence)))
 
     def lemma_sents(self,fileid=None,start=None,end=None,era=None,category=None):
         sentences = self.sents(fileid,start,end,era,category)
@@ -263,14 +208,16 @@ class HistoricalCorpus(XMLCorpusReader):
             stop_words = open(stop_words,'r').readlines()
             stop_words = set(stop_word[:-1] for stop_word in stop_words)
         fileids = self.fileids(era, category)
-
+        skipDict = not dictionarySet
+        if not dictionarySet:
+            dictionarySet = []
         limits = dict((word, limit) for word in dictionarySet if word not in stop_words)
         if fileid:
             fileids = [fileid]
         for fileid in fileids:
             print('INFO GET APPEARS HISDICT: DOING FILE: ',fileid)
             self.countFiles += 1
-            print('INFO GET APPEARS HISDICT: COUND FILES ',self.countFiles,
+            print('INFO GET APPEARS HISDICT: COUNT FILES ',self.countFiles,
                   ' OUT OF ', len(self.fileids()))
             limitsbf = dict((word, limitByFile) for word in dictionarySet if word not in stop_words)
             id = self._idsByfileIds[fileid]
@@ -283,11 +230,13 @@ class HistoricalCorpus(XMLCorpusReader):
                     lsentence = araby.strip_tashkeel(" ".join(sentence)).split()
                 pos = 0
                 for word in lsentence:
+                    if not araby.is_arabicword(word):
+                        continue
                     pos += 1
 
-                    if word not in limitsbf:
+                    if not skipDict and word not in limitsbf:
                         continue
-                    if word not in limits:
+                    if not skipDict and word not in limits:
                         continue
                     if get_sentences:
                         low = max([0, pos - context_size])
@@ -297,6 +246,9 @@ class HistoricalCorpus(XMLCorpusReader):
                                      "word_pos": pos, 'sentence': " ".join(out_sentence)}
                     else:
                         yield word, {"file_id": id, "sentence_pos": i, "word_pos": pos}
+
+                    if len(dictionarySet) == 0:
+                        continue
                     limits[word] -= 1
                     if not limits[word]:
                         del limits[word]
@@ -314,10 +266,14 @@ class HistoricalCorpus(XMLCorpusReader):
         apparitions = {}
         eras = self.eras()
         categories = self.categories()
+
         if era:
             eras = [era]
         if category:
             categories = [category]
+        if fileid:
+            eras = [1]
+            categories = [1]
         self.countFiles = 0
         for era in eras:
             for category in categories:
