@@ -37,6 +37,7 @@ class MeaningAppearsSerializer(serializers.ModelSerializer):
 
 
 class EntrySerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
     meaning_set = MeaningSerializer(many=True, required=False, allow_null=True)
 
     class Meta:
@@ -52,7 +53,12 @@ class EntrySerializer(serializers.ModelSerializer):
         dictionary, created = Dictionary.objects.get_or_create(name=HIST_DICT_NAME)
         print('dictionary', dictionary)
         # use the default (HIST_DICT_NAME) instead
-        entry, created = Entry.objects.get_or_create(dictionary=dictionary, **validated_data)
+        id = validated_data.pop('id', '')
+        if id:
+            print('Hey! id is there !')
+            entry = Entry.objects.get(id=id)
+        else:
+            entry, created = Entry.objects.get_or_create(dictionary=dictionary, **validated_data)
 
         print('term', entry)
 
