@@ -51,12 +51,12 @@ def split_sentences(fileids,batch=1000000,lemma=True):
         yield result
 
 
-def add_all_docs(lemma=True):
+def add_all_docs(lemma=True,batch=1000000):
     es = connect_elasticsearch()
     if not es:
         print("ERROR ELASTIC FILL: COULDN'T CONNECT")
         return False
-    result = split_sentences(corpus.fileids(),lemma=lemma)
+    result = split_sentences(corpus.fileids(),batch=batch,lemma=lemma)
     index = get_sentence_index_name(lemma)
     create_sentence_index(index,es)
     for sentences in result:

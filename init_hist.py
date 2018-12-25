@@ -1,5 +1,3 @@
-from api.fill_database.historicalDict import fillHistoric
+from api.corpus.search.fill_indices import add_all_docs
 
-
-if __name__ == '__main__':
-    fillHistoric()
+add_all_docs(True,batch=100000)
