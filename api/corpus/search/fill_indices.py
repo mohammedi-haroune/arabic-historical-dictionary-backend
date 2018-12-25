@@ -29,7 +29,7 @@ def split_sentences(fileids,batch=1000000,lemma=True):
     for fileid in fileids:
         count_files += 1
         print('INFO ELASTIC ADD: DOING FILE',fileid)
-        print('INFO ELASTIC ADD: FILE',count_files,'/',size_files)
+        print('INFO ELASTIC ADD: FILE COUNT',count_files,'/',size_files)
         if lemma:
             sentences = corpus.gen_lemma_sents(fileid=fileid)
         else:
