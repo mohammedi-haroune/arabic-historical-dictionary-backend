@@ -24,8 +24,12 @@ def create_sentence_index(index,es):
 def split_sentences(fileids,batch=1000000,lemma=True):
     result = []
     wcount = 0
+    count_files = 0
+    size_files = len(fileids)
     for fileid in fileids:
+        count_files += 1
         print('INFO ELASTIC ADD: DOING FILE',fileid)
+        print('INFO ELASTIC ADD: FILE',count_files,'/',size_files)
         if lemma:
             sentences = corpus.gen_lemma_sents(fileid=fileid)
         else:

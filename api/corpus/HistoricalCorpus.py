@@ -95,19 +95,27 @@ class HistoricalCorpus(XMLCorpusReader):
         cpt = 0
 
         for fileid in fileids:
-            for event, entry in ElementTree.iterparse(self.abspath(fileid).open()):
-                if entry.tag == "sentence":
-                    cpt += 1
-                    if end is not None and cpt > end:
-                        break
-                    if cpt < start:
-                        continue
-                    try:
-                        yield nltk.TreebankWordTokenizer().tokenize(entry.text)
-                    except TypeError:
-                        print(entry.text)
-                        print(fileid)
-                entry.clear()
+            gen = ElementTree.iterparse(self.abspath(fileid).open())
+            while True:
+                try:
+                    event, entry = next(gen)
+                    if entry.tag == "sentence":
+                        cpt += 1
+                        if end is not None and cpt > end:
+                            break
+                        if cpt < start:
+                            continue
+                        try:
+                            yield nltk.TreebankWordTokenizer().tokenize(entry.text)
+                        except TypeError:
+                            print(entry.text)
+                            print(fileid)
+                    entry.clear()
+                except StopIteration:
+                    break
+                except Exception as e:
+                    print('ERROR HISTORICAL CORPUS GENSENTS: ',e)
+                    break
 
 
     def _gen_sents_class_based(self, fileid):
