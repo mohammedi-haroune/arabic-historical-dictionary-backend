@@ -44,7 +44,7 @@ def filter_files_sents(term,era=None,category=None,fileid=None,page=1,perpage=20
             'document':{
                 'fileid': src['parent'],
                 'book': src['book'],
-                'id': document.pk
+                'document': document.pk
             },
             'lemma_sentence': src['sentence'],
             'sentence':sent,
