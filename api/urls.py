@@ -26,7 +26,6 @@ router.register(r'word_appears', WordAppearsViewSet)
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
-    path('entries', fill_maany.entries, name='entries'),
     path('export/xml', historicalDict.export_dict_Xml, name='entries'),
     #api/statistics to get global statistics set ?refresh=1 to refresh statistics
     path('statistics', historicalDict.getStatistics, name='stats'),
@@ -44,9 +43,8 @@ urlpatterns = [
     path('fill/dico/wassit', fill_dicos.wassit, name='wassit'),
     path('fill/dico/alghni', fill_dicos.elghani, name='elghani'),
     path('fill/dico/alraeid', fill_dicos.elraeid, name='elraeid'),
-    path('search/filter/eraCat', search_end.filter_end_e_c, name='filterdata'),
-    path('search/filter/fileSents', search_end.filter_end_f_s, name='filterdata'),
-    path('testDoc', fill_documents.testDoc, name='testDoc'),
+    path('search/appears', search_end.filter_end_e_c, name='filterdata'),
+    path('search/sentences', search_end.filter_end_f_s, name='filterdata'),
     path('apparition/word',historicalDict.getWordAppears, name='word_appears'),
     path('categories/', CategoryList.as_view()),
     path('postags/', PostagList.as_view()),
