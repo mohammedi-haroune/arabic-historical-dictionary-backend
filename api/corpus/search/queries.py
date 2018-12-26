@@ -2,6 +2,7 @@ from django.http import JsonResponse
 
 from api.corpus.initializer import corpus
 from api.corpus.search.common import connect_elasticsearch, get_sentence_index_name
+from api.models import Document
 
 
 def filter_files_sents(term,era=None,category=None,fileid=None,page=1,perpage=20,lemma=True):
@@ -33,12 +34,18 @@ def filter_files_sents(term,era=None,category=None,fileid=None,page=1,perpage=20
         src = res['_source']
         position = src['position']
         fileid = src['parent']
+
         # TODO FIX FILEID IN ELASTICSEARCH SERVER
         fileid = '/'.join(fileid.split('/')[1:])
-        sent = corpus.sents(fileid,position+1,position+1)
+        document = Document.objects.filter(fileid=fileid)[0]
+        # sent = corpus.sents(fileid,position+1,position+1)
+        sent = src['sentence']
         result.append({
-            'fileid': src['parent'],
-            'book': src['book'],
+            'document':{
+                'fileid': src['parent'],
+                'book': src['book'],
+                'id': document.pk
+            },
             'lemma_sentence': src['sentence'],
             'sentence':sent,
             'position': src['position']
