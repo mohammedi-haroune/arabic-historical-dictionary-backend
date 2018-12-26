@@ -28,11 +28,11 @@ def filter_end_f_s(request):
     if 'fileid' in get:
         fileid = get['fileid']
     if 'page' in get:
-        page = get['page']
+        page = int(get['page'])
     if 'perpage' in get:
-        perpage = get['perpage']
+        perpage = int(get['perpage'])
     if 'lemma' in get:
-        lemma = get['lemma']
+        lemma = int(get['lemma'])
 
     result = filter_files_sents(term,era,category,fileid,page,perpage,lemma)
     return JsonResponse(result,safe=False)
@@ -57,7 +57,7 @@ def filter_end_e_c(request):
     if 'category' in get:
         category = get['category']
     if 'lemma' in get:
-        lemma = get['lemma']
+        lemma = int(get['lemma'])
 
     result = filter_cat_era(term,era,category,lemma)
     return JsonResponse(result,safe=False)
