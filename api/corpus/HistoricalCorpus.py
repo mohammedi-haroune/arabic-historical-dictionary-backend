@@ -123,7 +123,7 @@ class HistoricalCorpus(XMLCorpusReader):
         return SentsIterator(self, fileid,metadata["size"])
 
     def gen_words(self,fileids=None,start=None,end=None,era=None,category=None):
-        sentences = self._genSents(fileids,era=era,category=category)
+        sentences = self.gen_sents(fileids,era=era,category=category)
         if not start:
             start = 0
         limit = -1
@@ -155,13 +155,13 @@ class HistoricalCorpus(XMLCorpusReader):
         fileids = None
         if fileid is not None:
             fileids = [fileid]
-        return [sent for sent in self._genSents(fileids,start,end,era,category)]
+        return [sent for sent in self.gen_sents(fileids,start,end,era,category)]
 
     def words(self, fileid=None,start=None,end=None,era=None,category=None):
         fileids = None
         if fileid:
             fileids = [fileid]
-        words = [word for word in self._genWords(fileids,start,end,era=era,category=category)]
+        words = [word for word in self.gen_words(fileids,start,end,era=era,category=category)]
         return words
 
     def farasa(self):
@@ -229,7 +229,7 @@ class HistoricalCorpus(XMLCorpusReader):
                   ' OUT OF ', len(self.fileids()))
             limitsbf = dict((word, limitByFile) for word in dictionarySet if word not in stop_words)
             id = self._idsByfileIds[fileid]
-            sentences = self._genSents([fileid])
+            sentences = self.gen_sents([fileid])
             i = 0
             for sentence in sentences:
                 if lemma:

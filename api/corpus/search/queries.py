@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 
+from api.corpus.initializer import corpus
 from api.corpus.search.common import connect_elasticsearch, get_sentence_index_name
 
 
@@ -23,16 +24,24 @@ def filter_files_sents(term,era=None,category=None,fileid=None,page=1,perpage=20
     if category:
         query['query']['bool']['filter'].append({"term":{"category":category}})
     if fileid:
+        print('fileid is',fileid)
         query['query']['bool']['filter'].append({"term":{"parent":fileid}})
     r = es.search(index=index,body=query)
     r = r['hits']['hits']
     result = []
+
     for res in r:
         src = res['_source']
+        position = src['position']
+        fileid = src['parent']
+        # TODO FIX FILEID IN ELASTICSEARCH SERVER
+        fileid = '/'.join(fileid.split('/')[1:])
+        sent = corpus.sents(fileid,position+1,position+1)
         result.append({
             'fileid': src['parent'],
             'book': src['book'],
-            'sentence': src['sentence'],
+            'lemma_sentence': src['sentence'],
+            'sentence':sent,
             'position': src['position']
         })
     return result

@@ -123,6 +123,9 @@ def wassit(request):
     Meaning.objects.bulk_create(meaningsToCreate)
     return HttpResponse("done!")
 
+def delete_weird(request):
+    Entry.objects.filter(term__startswith='ء').delete()
+    return HttpResponse('done')
 
 # def wassit(request):
 #
