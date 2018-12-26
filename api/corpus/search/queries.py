@@ -29,7 +29,6 @@ def filter_files_sents(term,era=None,category=None,fileid=None,page=1,perpage=20
     r = es.search(index=index,body=query)
     r = r['hits']['hits']
     result = []
-
     for res in r:
         src = res['_source']
         position = src['position']
