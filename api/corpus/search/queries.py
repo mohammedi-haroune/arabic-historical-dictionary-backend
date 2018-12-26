@@ -2,6 +2,7 @@ from django.http import JsonResponse
 
 from api.corpus.initializer import corpus
 from api.corpus.search.common import connect_elasticsearch, get_sentence_index_name
+from api.fill_database.fill_documents import mapEraToArabic
 from api.models import Document
 
 
@@ -94,7 +95,7 @@ def filter_cat_era(term,era=None,category=None,lemma=True):
     result = {'eras': [], 'categories': []}
 
     for era in eras:
-        result['eras'].append(era['key'])
+        result['eras'].append(mapEraToArabic[era['key']])
         cats = era['uni_cats']['buckets']
         for cat in cats:
             result['categories'].append(cat['key'])
