@@ -42,11 +42,7 @@ def filter_files_sents(term,era=None,category=None,fileid=None,page=1,perpage=20
         # sent = corpus.sents(fileid,position+1,position+1)
         sent = src['sentence']
         result.append({
-            'document':{
-                'fileid': src['parent'],
-                'book': src['book'],
-                'document': document.pk
-            },
+            'document': document.id,
             'lemma_sentence': src['sentence'],
             'sentence':sent,
             'position': src['position']
