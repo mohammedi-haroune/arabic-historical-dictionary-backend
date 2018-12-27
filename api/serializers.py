@@ -18,6 +18,7 @@ class AppearsSerializer(serializers.ModelSerializer):
 
 class MeaningSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
+    posTag = serializers.CharField(max_length=200, required=False, allow_blank=True)
     is_appears = serializers.SerializerMethodField(required=False, allow_null=True)
     appears_set = AppearsSerializer(many=True, allow_null=True, required=False)
 
