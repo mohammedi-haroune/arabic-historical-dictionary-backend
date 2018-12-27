@@ -2,7 +2,7 @@ from django.http import JsonResponse
 
 from api.corpus.initializer import corpus
 from api.corpus.search.common import connect_elasticsearch, get_sentence_index_name
-from api.fill_database.fill_documents import mapEraToArabic
+from api.fill_database.fill_documents import mapEraToArabic, mapEraToEnglish
 from api.models import Document
 
 
@@ -22,6 +22,10 @@ def filter_files_sents(term,era=None,category=None,fileid=None,page=1,perpage=20
         }
     }
     if era:
+        if era in mapEraToEnglish:
+            era = mapEraToEnglish[era]
+        elif era not in mapEraToArabic:
+            raise Exception('era does not exist')
         query['query']['bool']['filter'].append({"term":{"era":era}})
     if category:
         query['query']['bool']['filter'].append({"term":{"category":category}})
@@ -83,6 +87,10 @@ def filter_cat_era(term,era=None,category=None,lemma=True):
         }
     }
     if era:
+        if era in mapEraToEnglish:
+            era = mapEraToEnglish[era]
+        elif era not in mapEraToArabic:
+            raise Exception('era does not exist')
         query['aggs']['t_matched']['filter']['bool']['filter'].append({"term":{"era":era}})
     if category:
         query['aggs']['t_matched']['filter']['bool']['filter'].append({"term":{"category":category}})
