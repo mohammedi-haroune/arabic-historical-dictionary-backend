@@ -47,7 +47,7 @@ def filter_files_sents(term,era=None,category=None,fileid=None,page=1,perpage=20
         sent = src['sentence']
         result.append({
             'document': document.id,
-            'lemma_sentence': src['sentence'],
+            # 'lemma_sentence': src['sentence'],
             'sentence':sent,
             'position': src['position']
         })
