@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 
+from api.corpus.initializer import corpus
 from api.corpus.search.queries import filter_files_sents, filter_cat_era
 
 
@@ -34,6 +35,10 @@ def filter_end_f_s(request):
     if 'lemma' in get:
         lemma = int(get['lemma'])
 
+    if lemma:
+        print('BEFORE LEMMA',term)
+        term = corpus.farasa().lemmatize(term)[0]
+        print('AFTER LEMMA', term)
     result = filter_files_sents(term,era,category,fileid,page,perpage,lemma)
     return JsonResponse(result,safe=False)
 
@@ -58,6 +63,9 @@ def filter_end_e_c(request):
         category = get['category']
     if 'lemma' in get:
         lemma = int(get['lemma'])
-
+    if lemma:
+        print('BEFORE LEMMA',term)
+        term = corpus.farasa().lemmatize(term)[0]
+        print('AFTER LEMMA', term)
     result = filter_cat_era(term,era,category,lemma)
     return JsonResponse(result,safe=False)

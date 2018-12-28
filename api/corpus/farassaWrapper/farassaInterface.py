@@ -10,16 +10,20 @@ class Farasa:
         root = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
         root += "/libs/jars/"
         path_to_jars = str.join(":", [root + name for name in os.listdir(root)])
+        print('FARASA STARTING')
         # if not jpype.isJVMStarted():
         if not jpype.isJVMStarted():
             jpype.startJVM(jvmPath,
                        "-Djava.class.path="+path_to_jars)
-        self.far = JPackage("com").qcri.farasa.segmenter.Farasa()
 
     def segment(self,text):
+        self.far = JPackage("com").qcri.farasa.segmenter.Farasa()
         return self.far.segmentLine(text)
 
     def lemmatize(self, text):
+        print('GONNA START FA')
+        self.far = JPackage("com").qcri.farasa.segmenter.Farasa()
+        print('GONNA LEMMATIZE')
         return self.far.lemmatizeLine(text)
     #
     def tag(self,text):
