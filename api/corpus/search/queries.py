@@ -98,17 +98,20 @@ def filter_cat_era(term,era=None,category=None,lemma=True):
     eras = r['aggregations']['t_matched']['uni_eras']['buckets']
     result = {'eras': [], 'categories': []}
 
+    result_couples = []
+
     for era in eras:
         result['eras'].append(mapEraToArabic[era['key']])
         cats = era['uni_cats']['buckets']
         for cat in cats:
             result['categories'].append(cat['key'])
+            result_couples.append((mapEraToArabic[era['key']], cat['key']))
     result['eras'] = list(set(result['eras']))
     result['categories'] = list(set(result['categories']))
     # hits = r['hits']['hits']
     # for hit in hits:
     #     print(hit['_source']['era'])
-    return result
+    return result_couples
 
 
 if __name__ == "__main__":
