@@ -43,7 +43,7 @@ def filter_files_sents(term,era=None,category=None,fileid=None,page=1,perpage=20
         # TODO FIX FILEID IN ELASTICSEARCH SERVER
         fileid = '/'.join(fileid.split('/')[1:])
         document = Document.objects.filter(fileid=fileid)[0]
-        # sent = corpus.sents(fileid,position+1,position+1)
+        sent = corpus.sents(fileid,position+1,position+1)
         sent = src['sentence']
         result.append({
             'document': document.id,
