@@ -190,13 +190,35 @@ def getGlobalStatistics(refresh=False):
         json.dump(global_stats, fp)
     print('INFO GET STATISTICS: FINISHED REFRESHING')
     return global_stats
+
 def getStatistics(request):
     refresh = False
     if request.method == 'GET':
         get = request.GET
         if 'refresh' in get:
             refresh = get['refresh'][0]
-    stats = getGlobalStatistics(refresh)
+    stats = dict((mapEraToArabic[e], dict((c, {}) for c in corpus.categories()))
+                 for e in corpus.eras())
+    total = 0
+    total_s = 0
+    for era in corpus.eras():
+        total_era = 0
+        total_era_s = 0
+        for category in corpus.categories():
+            fileids = corpus.fileids(era,category)
+            stats[mapEraToArabic[era]][category]['num_docs'] = len(fileids)
+            total_era += len(fileids)
+            size = sum([os.path.getsize(corpus.abspath(fileid)) for fileid in fileids])
+            stats[mapEraToArabic[era]][category]['size_docs'] = size
+            total_era_s += size
+        stats[mapEraToArabic[era]]['num_docs'] = total_era
+        stats[mapEraToArabic[era]]['size_docs'] = total_era_s
+        total += total_era
+        total_s += total_era_s
+    stats['num_docs'] = total
+    stats['size_docs'] = total_s
+
+    # stats = getGlobalStatistics(refresh)
     return JsonResponse(stats,safe=False)
 
 
