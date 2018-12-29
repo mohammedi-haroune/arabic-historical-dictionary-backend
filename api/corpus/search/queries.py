@@ -5,6 +5,21 @@ from api.corpus.search.common import connect_elasticsearch, get_sentence_index_n
 from api.fill_database.fill_documents import mapEraToArabic, mapEraToEnglish
 from api.models import Document
 
+def get_sentence(fileid,position,term,lemma_sentence):
+    sent = corpus.sents(fileid, position + 1, position + 1)[0]
+    if term not in lemma_sentence:
+        print('WARNING: TERM NOT IN LEMMA SENTENCE')
+        return sent
+    context_size = 5
+    if len(sent) <= context_size*2+1:
+        return sent
+    i = lemma_sentence.index(term)
+    low = max([0,i-context_size])
+    high = min([len(sent),i+context_size])
+    # to fix sent size to 10 tokens
+    addH = max([0,context_size-i])
+    addL = max(0,i+context_size-len(sent))
+    return sent[low-addL:high+addH]
 
 def filter_files_sents(term,era=None,category=None,fileid=None,page=1,perpage=20,lemma=True):
     es = connect_elasticsearch()
@@ -43,8 +58,8 @@ def filter_files_sents(term,era=None,category=None,fileid=None,page=1,perpage=20
         # TODO FIX FILEID IN ELASTICSEARCH SERVER
         fileid = '/'.join(fileid.split('/')[1:])
         document = Document.objects.filter(fileid=fileid)[0]
-        sent = corpus.sents(fileid,position+1,position+1)
-        sent = src['sentence']
+        sent = get_sentence(fileid,position,term,src['sentence'])
+        # sent = src['sentence']
         result.append({
             'document': document.id,
             # 'lemma_sentence': src['sentence'],
