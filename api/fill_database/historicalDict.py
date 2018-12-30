@@ -110,7 +110,7 @@ def getWordStatistics(request):
         if 't' in get:
             apps = Appears.objects.select_related().filter(meaning__entry__term=get['t'])
 
-        elif 'id' not in get:
+        elif 'id' in get:
             apps = Appears.objects.select_related().filter(meaning__entry__id=get['id'])
         else:
             return JsonResponse({}, safe=False)
@@ -119,7 +119,7 @@ def getWordStatistics(request):
         if 't' in get:
             apps = Appears.objects.select_related().filter(meaning__entry__term=get['t'])
 
-        elif 'id' not in get:
+        elif 'id' in get:
             apps = Appears.objects.select_related().filter(meaning__entry__id=get['id'])
         else:
             return JsonResponse({}, safe=False)
