@@ -328,8 +328,7 @@ def fillHistoricDict(request):
         get = request.GET
         if 'words' in get:
             words = get['words']
-            if not words is list:
-                words = [words]
+            words = words.split(',')
         else:
             raise Exception('No words given in request')
         if 'batch' in get:
@@ -368,7 +367,11 @@ def fillHistoricElastic(words,batch=10000):
     appearsGen = generate_word_appears(words,batch,documents)
     count = 0
     for appears in appearsGen:
-        entry = entries[appears['term']]
+        term = appears['term']
+        if term not in entries:
+            print('WARNING FILL HISTORIC ELASTIC: term not in entries ', term)
+            continue
+        entry = entries[term]
         appears = appears['appears']
         means = meanings[entry.pk]
         appears = [Appears(
