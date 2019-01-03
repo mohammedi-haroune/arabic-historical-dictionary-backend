@@ -321,7 +321,7 @@ def fillWordAppears(request):
 
 
 def fillHistoricDict(request):
-    emptyAppears(request=request)
+    # emptyAppears(request=request)
     refresh = False
     batch = 20
     if request.method == 'GET':
