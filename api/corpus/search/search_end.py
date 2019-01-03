@@ -70,8 +70,7 @@ def filter_end_e_c(request):
     result = filter_cat_era(term,era,category,lemma)
     return JsonResponse(result,safe=False)
 
-def generate_word_appears(words,batch=10000,documents=None):
+def generate_word_appears(words,batch=1000,documents=None):
     for word in words:
-        res_gen = appears_scanner(word,batch,documents,True)
-        for appears in res_gen:
-            yield {'term':word,'appears':appears}
+        appears = filter_files_sents(word,perpage=batch,documents=documents)
+        yield {'term':word,'appears':appears}

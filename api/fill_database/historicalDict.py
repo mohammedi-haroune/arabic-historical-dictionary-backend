@@ -373,9 +373,10 @@ def fillHistoricElastic(words,batch=10000):
             meaning=means[random.randrange(0, len(means))]
         ) for appear in appears]
         print('INFO FILL HISTORIC ELASTIC: APPEARS APPENDED BY ', len(appears))
-        Appears.objects.bulk_create(appears)
-        count += len(appears)
-        print('INFO FILL HISTORIC ELASTIC: APPEAR CREATED BULK ',count)
+        if len(appears):
+            Appears.objects.bulk_create(appears)
+            count += len(appears)
+            print('INFO FILL HISTORIC ELASTIC: APPEAR CREATED BULK ',count)
     return JsonResponse(['done'], safe=False)
 
 def fillHistoric(batch=10000):
