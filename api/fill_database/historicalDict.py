@@ -333,7 +333,7 @@ def fillHistoricDict(request):
         else:
             raise Exception('No words given in request')
         if 'batch' in get:
-            batch = get['batch']
+            batch = int(get['batch'])
     else:
         raise Exception('Expected get request')
 
