@@ -8,6 +8,7 @@ import django
 from django.core.paginator import Paginator
 from django.db import connection
 
+from api.corpus.search.search_end import generate_word_appears
 from api.fill_database.fill_documents import mapEraToArabic
 from api.models import Entry, Appears, Document, WordAppear, Meaning, Period
 
@@ -192,11 +193,16 @@ def getGlobalStatistics(refresh=False):
     return global_stats
 
 def getStatistics(request):
+    root = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+    file = root + '/global_stats.json'
     refresh = False
     if request.method == 'GET':
         get = request.GET
         if 'refresh' in get:
             refresh = get['refresh'][0]
+    if not refresh and os.path.isfile(file):
+        print('INFO GET STATISTICS: NOT REFRESHING')
+        return JsonResponse(json.loads(open(file).read()),safe=False)
     stats = dict((mapEraToArabic[e], dict((c, {}) for c in corpus.categories()))
                  for e in corpus.eras())
     total = 0
@@ -217,7 +223,9 @@ def getStatistics(request):
         total_s += total_era_s
     stats['num_docs'] = total
     stats['size_docs'] = total_s
-
+    with open(file, 'w') as fp:
+        json.dump(stats, fp)
+    print('INFO GET STATISTICS: FINISHED REFRESHING')
     # stats = getGlobalStatistics(refresh)
     return JsonResponse(stats,safe=False)
 
@@ -316,10 +324,14 @@ def fillHistoricDict(request):
     refresh = False
     if request.method == 'GET':
         get = request.GET
-        if 'refresh' in get:
-            refresh = get['refresh'][0]
+        if 'words' in get:
+            words = get['words']
+        else:
+            raise Exception('No words given in request')
+    else:
+        raise Exception('Expected get request')
 
-    return fillHistoric()
+    return fillHistoricElastic(words)
 
 def genWordAppears(batch=10000):
     paginator = Paginator(WordAppear.objects.all(),batch)
@@ -327,6 +339,44 @@ def genWordAppears(batch=10000):
         print("INFO: LOADING APPEARS PAGE ",p)
         for appear in paginator.get_page(p):
             yield appear
+
+def fillHistoricElastic(words,batch=10000):
+    print('INFO FILL HISTORIC ELASTIC: LOADING DOCUMENTS...')
+    documents = Document.objects.all()
+    documents = dict((document.fileid, document) for document in documents)
+    documents_ids = dict((document.pk, document) for document in documents.values())
+    print('INFO FILL HISTORIC ELASTIC: LOADING ENTRIES...')
+    entries = Entry.objects.filter(term__in=words)
+    entries_ids = [entry.pk for entry in entries]
+    entries = dict((entry.term,entry) for entry in entries)
+    print('INFO FILL HISTORIC ELASTIC: LOADING MEANINGS...')
+    meaningsql = Meaning.objects.filter(entry__id__in=entries_ids)
+    meanings = {}
+    for meaning in meaningsql:
+        # print("INFO FILL HISTORIC DICT: LOADING MEANINGS...", count)
+        if meaning.entry_id in meanings:
+            meanings[meaning.entry_id].append(meaning)
+        else:
+            meanings[meaning.entry_id] = [meaning]
+
+    appearsGen = generate_word_appears(words,batch,documents)
+    count = 0
+    for appears in appearsGen:
+        entry = entries[appears['term']]
+        appears = appears['appears']
+        means = meanings[entry.pk]
+        appears = [Appears(
+            sentence=" ".join(appear['sentence']),#wordAppear.sentence,
+            position=appear['position'],#wordAppear.position,
+            word_position=appear['word_position'],#wordAppear.word_position,
+            document=documents_ids[appear['document']],#document,
+            meaning=means[random.randrange(0, len(means))]
+        ) for appear in appears]
+        print('INFO FILL HISTORIC ELASTIC: APPEARS APPENDED BY ', len(appears))
+        Appears.objects.bulk_create(appears)
+        count += len(appears)
+        print('INFO FILL HISTORIC ELASTIC: APPEAR CREATED BULK ',count)
+    return JsonResponse(['done'], safe=False)
 
 def fillHistoric(batch=10000):
 

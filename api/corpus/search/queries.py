@@ -1,4 +1,5 @@
 from django.http import JsonResponse
+from elasticsearch.helpers import scan
 
 from api.corpus.initializer import corpus
 from api.corpus.search.common import connect_elasticsearch, get_sentence_index_name
@@ -19,9 +20,62 @@ def get_sentence(fileid,position,term,lemma_sentence):
     # to fix sent size to 10 tokens
     addH = max([0,context_size-i])
     addL = max(0,i+context_size-len(sent))
-    return sent[low-addL:high+addH]
+    sent = sent[low-addL:high+addH]
+    return sent,context_size-addH
 
-def filter_files_sents(term,era=None,category=None,fileid=None,page=1,perpage=20,lemma=True):
+def appears_scanner(term,batch=5000,documents=None,lemma=True):
+    es = connect_elasticsearch()
+    index = get_sentence_index_name(lemma)
+    query = {
+        "query": {
+            "bool":
+                {
+                    "filter": [
+                        {"term": {"sentence": term}}
+                    ]
+                }
+        }
+    }
+    hit_gen = scan(es,index=index, query=query,size=batch)
+    result = []
+    for res in hit_gen:
+        print(len(result), 'so far')
+        src = res['_source']
+        position = src['position']
+        fileid = src['parent']
+
+        # TODO FIX FILEID IN ELASTICSEARCH SERVER
+        fileid = '/'.join(fileid.split('/')[1:])
+        if documents:
+            if fileid in documents:
+                document = documents[fileid]
+            else:
+                continue
+        else:
+            document = Document.objects.filter(fileid=fileid)
+            if document:
+                document = document[0]
+            else:
+                continue
+        sent, word_pos = get_sentence(fileid, position, term, src['sentence'])
+        # sent = src['sentence']
+        result.append({
+            'document': document.id,
+            # 'lemma_sentence': src['sentence'],
+            'sentence': sent,
+            'word_position': word_pos,
+            'position': src['position']
+
+        })
+        if len(result) >= batch:
+            yield result
+            result = []
+    if len(result):
+        yield result
+
+
+def filter_files_sents(term,era=None,category=None,fileid=None,page=1,perpage=20,
+                       lemma=True,documents=None):
     es = connect_elasticsearch()
     index = get_sentence_index_name(lemma)
     start = (page-1)*perpage
@@ -57,14 +111,26 @@ def filter_files_sents(term,era=None,category=None,fileid=None,page=1,perpage=20
 
         # TODO FIX FILEID IN ELASTICSEARCH SERVER
         fileid = '/'.join(fileid.split('/')[1:])
-        document = Document.objects.filter(fileid=fileid)[0]
-        sent = get_sentence(fileid,position,term,src['sentence'])
+        if documents:
+            if fileid in documents:
+                document = documents[fileid]
+            else:
+                continue
+        else:
+            document = Document.objects.filter(fileid=fileid)
+            if document:
+                document = document[0]
+            else:
+                continue
+        sent,word_pos = get_sentence(fileid,position,term,src['sentence'])
         # sent = src['sentence']
         result.append({
             'document': document.id,
             # 'lemma_sentence': src['sentence'],
             'sentence':sent,
+            'word_position':word_pos,
             'position': src['position']
+
         })
     return result
 
@@ -127,6 +193,7 @@ def filter_cat_era(term,era=None,category=None,lemma=True):
     # for hit in hits:
     #     print(hit['_source']['era'])
     return result_couples
+
 
 
 if __name__ == "__main__":
