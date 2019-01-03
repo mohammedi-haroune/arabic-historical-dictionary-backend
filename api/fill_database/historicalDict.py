@@ -2,6 +2,7 @@ import inspect
 import json
 import os
 import random
+import types
 from json.decoder import WHITESPACE
 
 import django
@@ -322,16 +323,21 @@ def fillWordAppears(request):
 def fillHistoricDict(request):
     emptyAppears(request=request)
     refresh = False
+    batch = 20
     if request.method == 'GET':
         get = request.GET
         if 'words' in get:
             words = get['words']
+            if not words is list:
+                words = [words]
         else:
             raise Exception('No words given in request')
+        if 'batch' in get:
+            batch = get['batch']
     else:
         raise Exception('Expected get request')
 
-    return fillHistoricElastic(words)
+    return fillHistoricElastic(words,batch)
 
 def genWordAppears(batch=10000):
     paginator = Paginator(WordAppear.objects.all(),batch)

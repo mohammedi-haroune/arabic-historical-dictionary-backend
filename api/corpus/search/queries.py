@@ -10,10 +10,10 @@ def get_sentence(fileid,position,term,lemma_sentence):
     sent = corpus.sents(fileid, position + 1, position + 1)[0]
     if term not in lemma_sentence:
         print('WARNING: TERM NOT IN LEMMA SENTENCE')
-        return sent
+        return sent,-1
     context_size = 5
     if len(sent) <= context_size*2+1:
-        return sent
+        return sent,lemma_sentence.index(term)
     i = lemma_sentence.index(term)
     low = max([0,i-context_size])
     high = min([len(sent),i+context_size])
@@ -39,7 +39,6 @@ def appears_scanner(term,batch=5000,documents=None,lemma=True):
     hit_gen = scan(es,index=index, query=query,size=batch)
     result = []
     for res in hit_gen:
-        print(len(result), 'so far')
         src = res['_source']
         position = src['position']
         fileid = src['parent']
