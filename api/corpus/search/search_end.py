@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 
 from api.corpus.initializer import corpus
-from api.corpus.search.queries import filter_files_sents, filter_cat_era
+from api.corpus.search.queries import filter_files_sents, filter_cat_era, appears_scanner
 
 
 def filter_end_f_s(request):
@@ -69,3 +69,8 @@ def filter_end_e_c(request):
         print('AFTER LEMMA', term)
     result = filter_cat_era(term,era,category,lemma)
     return JsonResponse(result,safe=False)
+
+def generate_word_appears(words,batch=1000,documents=None):
+    for word in words:
+        appears = filter_files_sents(word,perpage=batch,documents=documents)
+        yield {'term':word,'appears':appears}
