@@ -10,7 +10,7 @@ from django.core.paginator import Paginator
 from django.db import connection
 
 from api.corpus.search.search_end import generate_word_appears
-from api.fill_database.fill_documents import mapEraToArabic
+from api.fill_database.fill_documents import mapEraToArabic,eras
 from api.models import Entry, Appears, Document, WordAppear, Meaning, Period
 
 try: from xml.etree import cElementTree as ET
@@ -148,6 +148,7 @@ def getWordStatistics(request):
         word_stats[meaning.pk]['stats'][era][category] += 1
         count += 1
         print("INFO GET STATISTICS: ADDED APPEAR TO STATS...",count)
+    word_stats['ordered_eras'] = [mapEraToArabic[era] for era in eras]
     return JsonResponse(word_stats,safe=False)
 
 def getGlobalStatistics(refresh=False):
