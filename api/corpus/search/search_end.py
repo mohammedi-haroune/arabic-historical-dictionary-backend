@@ -2,6 +2,7 @@ from django.http import JsonResponse
 
 from api.corpus.initializer import corpus
 from api.corpus.search.queries import filter_files_sents, filter_cat_era, appears_scanner, stats_words_appears
+from api.fill_database.fill_documents import mapEraToArabic, eras
 
 
 def filter_end_f_s(request):
@@ -55,7 +56,10 @@ def get_sentence_appears(request):
         s = s.split(',')
     else:
         raise Exception('ERROR: VARIABLE s IS NOT SPECIFIED')
-    stats = stats_words_appears(s)
+    stats = {
+        'stats':stats_words_appears(s),
+        'ordered_eras': [mapEraToArabic[era] for era in eras]
+    }
     return JsonResponse(stats,safe=False)
 
 

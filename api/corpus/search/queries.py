@@ -236,7 +236,6 @@ def stats_words_appears(terms,era=None,category=None,lemma=True):
     eras = r['aggregations']['t_matched']['uni_eras']['buckets']
 
     result = {}
-    print(eras)
     for era in eras:
         result[mapEraToArabic[era['key']]] = {}
         cats = era['uni_cats']['buckets']
