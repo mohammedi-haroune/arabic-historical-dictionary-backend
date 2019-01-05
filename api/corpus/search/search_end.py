@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 
 from api.corpus.initializer import corpus
-from api.corpus.search.queries import filter_files_sents, filter_cat_era, appears_scanner
+from api.corpus.search.queries import filter_files_sents, filter_cat_era, appears_scanner, stats_words_appears
 
 
 def filter_end_f_s(request):
@@ -41,6 +41,23 @@ def filter_end_f_s(request):
         print('AFTER LEMMA', term)
     result = filter_files_sents(term,era,category,fileid,page,perpage,lemma)
     return JsonResponse(result,safe=False)
+
+
+def get_sentence_appears(request):
+    if request.method == 'GET':
+        get = request.GET
+    elif request.method == 'POST':
+        get = request.POST
+    else:
+        raise Exception('ERROR: NOT GET OR POST REQUEST')
+    if 's' in get:
+        s = get['s']
+        s = s.split(',')
+    else:
+        raise Exception('ERROR: VARIABLE s IS NOT SPECIFIED')
+    stats = stats_words_appears(s)
+    return JsonResponse(stats,safe=False)
+
 
 def filter_end_e_c(request):
     term = False

@@ -176,22 +176,74 @@ def filter_cat_era(term,era=None,category=None,lemma=True):
         query['aggs']['t_matched']['filter']['bool']['filter'].append({"term":{"category":category}})
     r = es.search(index=index,body=query)
     eras = r['aggregations']['t_matched']['uni_eras']['buckets']
-    result = {'eras': [], 'categories': []}
 
     result_couples = []
-
+    print(eras)
     for era in eras:
-        result['eras'].append(mapEraToArabic[era['key']])
         cats = era['uni_cats']['buckets']
         for cat in cats:
-            result['categories'].append(cat['key'])
             result_couples.append((mapEraToArabic[era['key']], cat['key']))
-    result['eras'] = list(set(result['eras']))
-    result['categories'] = list(set(result['categories']))
+
     # hits = r['hits']['hits']
     # for hit in hits:
     #     print(hit['_source']['era'])
     return result_couples
+
+def stats_words_appears(terms,era=None,category=None,lemma=True):
+    es = connect_elasticsearch()
+    index = get_sentence_index_name(lemma)
+    query = {
+        "size":0,
+        'aggs':{
+            't_matched':{
+                "filter":{
+                    "bool":{
+                        "filter":[
+
+                        ]
+                    }
+                },
+                "aggs": {
+                    "uni_eras":
+                        {
+                            "terms": {
+                                "field": "era",
+                            },
+                            "aggs": {
+                                "uni_cats":
+                                    {
+                                        "terms": {
+                                            "field": "category",
+                                        }
+                                    }
+                            }
+                        }
+                }
+            }
+        }
+    }
+    for term in terms:
+        query['aggs']['t_matched']['filter']['bool']['filter'].append({"term":{"sentence":term}})
+    if era:
+        if era in mapEraToEnglish:
+            era = mapEraToEnglish[era]
+        elif era not in mapEraToArabic:
+            raise Exception('era does not exist')
+        query['aggs']['t_matched']['filter']['bool']['filter'].append({"term":{"era":era}})
+    if category:
+        query['aggs']['t_matched']['filter']['bool']['filter'].append({"term":{"category":category}})
+    r = es.search(index=index,body=query)
+    eras = r['aggregations']['t_matched']['uni_eras']['buckets']
+
+    result = {}
+    print(eras)
+    for era in eras:
+        result[mapEraToArabic[era['key']]] = {}
+        cats = era['uni_cats']['buckets']
+        for cat in cats:
+            result[mapEraToArabic[era['key']]][cat['key']] = cat['doc_count']
+
+    return result
 
 
 

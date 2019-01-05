@@ -30,7 +30,11 @@ urlpatterns = [
     #api/statistics to get global statistics set ?refresh=1 to refresh statistics
     path('statistics', historicalDict.getStatistics, name='stats'),
     #api/statistics/word?t=<t1> to get statistics regarding t1's meanings or id=<id1>: id1 is term's id
-    path('statistics/word',historicalDict.getWordStatistics,name='word_stats'),
+    path('statistics/word', historicalDict.getWordStatistics, name='word_stats'),
+    # api/statistics/doc?fileid=<d1> to get statistics regarding d1's content or id=<id1>: id1 is doc's id
+    path('statistics/doc', historicalDict.getDocStatistics, name='doc_stats'),
+    # api/statistics/sent?s=<s1> to get statistics regarding s1's appears in corpus
+    path('statistics/sent',search_end.get_sentence_appears,name='sent_stats'),
     path('delete/appears', historicalDict.emptyAppears, name='delete_word_appears'),
     path('delete/wordAppears', historicalDict.emptyWordAppears, name='delete_appears'),
     path('delete/documents', fill_documents.emptyDocuments, name='delete_documents'),

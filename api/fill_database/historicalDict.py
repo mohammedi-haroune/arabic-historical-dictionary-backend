@@ -104,9 +104,48 @@ def genAppears(batch=10000):
 
             yield appear
 
+
+
+
+def doc_stats(fileid):
+    words = corpus.gen_words([fileid])
+    stats = {
+        'num_words':0,
+        'num_chars':0,
+        'num_words_dico':0
+    }
+    print("INFO GET DOC STATS: LOADING ENTRIES...")
+    entries = Entry.objects.all()
+    entries = dict((entry.term, entry) for entry in entries)
+    types = set()
+    for word in words:
+        stats['num_words'] += 1
+        stats['num_chars'] += len(word)
+        if word in entries:
+            stats['num_words_dico'] += 1
+        types.add(word)
+    stats['num_types'] = len(types)
+    stats['doc_size'] = os.path.getsize(corpus.abspath(fileid))
+    return stats
+
+
+def getDocStatistics(request):
+    if request.method == 'GET':
+        get = request.GET
+        if 'fileid' in get:
+            fileid = get['fileid']
+        elif 'id' in get:
+            document = Document.objects.get(pk=get['id'])
+            fileid = document.fileid
+        else:
+            raise Exception('Error no get parameters found')
+    else:
+        raise Exception('Not get request')
+    stats = doc_stats(fileid)
+    return JsonResponse(stats,safe=False)
+
 def getWordStatistics(request):
     # categories = dict((e, dict((c, 0) for c in corpus.categories())) for e in corpus.eras())
-    get = {}
     if request.method == 'GET':
         get = request.GET
         if 't' in get:
