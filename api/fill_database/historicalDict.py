@@ -184,6 +184,8 @@ def getWordStatistics(request):
         document = appears.document
         category = document.category
         era = periods[document.period_id].name
+        if category not in word_stats[meaning.pk]['stats'][era]:
+            continue
         word_stats[meaning.pk]['stats'][era][category] += 1
         count += 1
         print("INFO GET STATISTICS: ADDED APPEAR TO STATS...",count)
