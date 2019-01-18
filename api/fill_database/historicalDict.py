@@ -364,13 +364,16 @@ def fillWordAppears(request):
 
 def fillHistoricDict(request):
     # emptyAppears(request=request)
-    refresh = False
     batch = 20
     if request.method == 'GET':
         get = request.GET
         if 'words' in get:
             words = get['words']
             words = words.split(',')
+            entries = Entry.objects.filter(term__in=words)
+        elif 'id' in get:
+            word = Entry.objects.get(pk=get['id'])
+            entries = [word]
         else:
             raise Exception('No words given in request')
         if 'batch' in get:
@@ -378,7 +381,7 @@ def fillHistoricDict(request):
     else:
         raise Exception('Expected get request')
 
-    return fillHistoricElastic(words,batch)
+    return fillHistoricElastic(entries,batch)
 
 def genWordAppears(batch=10000):
     paginator = Paginator(WordAppear.objects.all(),batch)
@@ -387,13 +390,13 @@ def genWordAppears(batch=10000):
         for appear in paginator.get_page(p):
             yield appear
 
-def fillHistoricElastic(words,batch=10000):
+def fillHistoricElastic(entries,batch=10000):
     print('INFO FILL HISTORIC ELASTIC: LOADING DOCUMENTS...')
     documents = Document.objects.all()
     documents = dict((document.fileid, document) for document in documents)
     documents_ids = dict((document.pk, document) for document in documents.values())
     print('INFO FILL HISTORIC ELASTIC: LOADING ENTRIES...')
-    entries = Entry.objects.filter(term__in=words)
+
     entries_ids = [entry.pk for entry in entries]
     entries = dict((entry.term,entry) for entry in entries)
     print('INFO FILL HISTORIC ELASTIC: LOADING MEANINGS...')
@@ -406,7 +409,7 @@ def fillHistoricElastic(words,batch=10000):
         else:
             meanings[meaning.entry_id] = [meaning]
 
-    appearsGen = generate_word_appears(words,batch,documents)
+    appearsGen = generate_word_appears(entries,batch,documents)
     count = 0
     for appears in appearsGen:
         term = appears['term']

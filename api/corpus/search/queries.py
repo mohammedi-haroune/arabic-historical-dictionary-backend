@@ -7,20 +7,29 @@ from api.fill_database.fill_documents import mapEraToArabic, mapEraToEnglish
 from api.models import Document
 
 def get_sentence(fileid,position,term,lemma_sentence):
+    punctuation = ['،',',','.','"',"'"]
     sent = corpus.sents(fileid, position + 1, position + 1)[0]
+    lemma_sentence = [w for w,w2 in zip(lemma_sentence,sent) if w not in punctuation or w == w2]
     if term not in lemma_sentence:
         print('WARNING: TERM NOT IN LEMMA SENTENCE')
         return sent,-1
     context_size = 5
-    if len(sent) <= context_size*2+1:
-        return sent,lemma_sentence.index(term)
     i = lemma_sentence.index(term)
+    # print(i)
+    # print(lemma_sentence[:10])
+    # print(sent[:10])
+    if len(sent) <= context_size*2+1:
+        return sent,i
+
     low = max([0,i-context_size])
     high = min([len(sent),i+context_size])
     # to fix sent size to 10 tokens
     addH = max([0,context_size-i])
     addL = max(0,i+context_size-len(sent))
     sent = sent[low-addL:high+addH]
+    # print(low,high)
+    # print(addL,addH)
+    # print(sent)
     return sent,context_size-addH
 
 def appears_scanner(term,batch=5000,documents=None,lemma=True):
@@ -122,6 +131,8 @@ def filter_files_sents(term,era=None,category=None,fileid=None,page=1,perpage=20
             else:
                 continue
         sent,word_pos = get_sentence(fileid,position,term,src['sentence'])
+        if word_pos == -1:
+            continue
         # sent = src['sentence']
         result.append({
             'document': document.id,
